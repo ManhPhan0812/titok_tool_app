@@ -15,7 +15,10 @@ watchdogs and short-audio checks, Douyin request-level transport selection,
 and bounded parallel Core verification, Gemini guidance/style/source ownership,
 Han subtitle language preflight and focused field synchronization. Security
 updates are Pillow 13.0.0, certifi 2026.10.19, setuptools 84.1.0, filelock 4.2.1
-and opentelemetry-api 1.45.1. Regenerated hash locks preserve unrelated versions.
+and the coupled OpenTelemetry 1.45.1 / semantic-conventions 0.66b1 family.
+Its upstream dependency graph adds Apache-2.0 OpenTelemetry exporter common
+and HTTP transport packages 0.66b1, not a new application provider or service.
+Regenerated hash locks preserve packages outside these dependency families.
 The Edge TTS archive URL now uses GitHub's extension-bearing archive endpoint;
 the full commit and downloaded SHA-256 remain identical to the reviewed source.
 No checkpoint, voice preview, font, artwork, FFmpeg/Qt build or media recipe changes.

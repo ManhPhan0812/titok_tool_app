@@ -5,11 +5,13 @@ StudioField {
     id: root
     property bool edited: false
     property bool committing: false
+    property bool sourceSyncPending: false
     property string sourceText: ""
     signal valueCommitted(string value)
 
     function syncSourceText() {
-        if (!activeFocus && !edited && !inputMethodComposing && text !== sourceText)
+        sourceSyncPending = activeFocus || edited || inputMethodComposing;
+        if (!sourceSyncPending && text !== sourceText)
             text = sourceText;
     }
     onSourceTextChanged: syncSourceText()
@@ -27,12 +29,19 @@ StudioField {
         if (edited && !inputMethodComposing) {
             edited = false;
             valueCommitted(text);
+            sourceSyncPending = false;
         }
         committing = false;
     }
 
     onTextEdited: edited = true
     onEditingFinished: commitEdits()
-    onActiveFocusChanged: if (!activeFocus) commitEdits()
-    onInputMethodComposingChanged: if (!inputMethodComposing && !activeFocus) commitEdits()
+    onActiveFocusChanged: if (!activeFocus) {
+        commitEdits();
+        if (sourceSyncPending) syncSourceText();
+    }
+    onInputMethodComposingChanged: if (!inputMethodComposing && !activeFocus) {
+        commitEdits();
+        if (sourceSyncPending) syncSourceText();
+    }
 }

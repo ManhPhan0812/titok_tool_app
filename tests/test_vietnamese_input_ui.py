@@ -197,6 +197,25 @@ SubtitleTextEditor {
         self.assertEqual(self.window.property("savedValue"), "Xin Việt")
         self.assertEqual(field.property("text"), "Xin Việt")
 
+    def test_focused_clean_watermark_synchronizes_deferred_source_on_blur(self):
+        self.create_window('''
+property string modelValue: "Gốc"
+property int saves: 0
+AutoSaveTextField {
+    objectName: "field"; x: 20; y: 20; width: 620; sourceText: root.modelValue
+    onValueCommitted: function(value) { root.modelValue = value; root.saves++ }
+}''')
+        field = self.window.findChild(QQuickItem, "field")
+        for source in ("Đã hoàn tác watermark", "Nguồn video mới"):
+            field.forceActiveFocus()
+            self.window.setProperty("modelValue", source)
+            self.assertNotEqual(field.property("text"), source)
+            QTest.mouseClick(self.window, Qt.LeftButton, Qt.NoModifier, QPoint(740, 470))
+            self.assertFalse(field.property("activeFocus"))
+            self.assertEqual(field.property("text"), source)
+            self.assertFalse(field.property("edited"))
+            self.assertEqual(self.window.property("saves"), 0)
+
     def test_watermark_model_updates_do_not_replace_active_edits(self):
         self.create_window('''
 property string modelValue: "Gốc"

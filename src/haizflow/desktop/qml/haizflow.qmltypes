@@ -1290,6 +1290,13 @@ Module {
             notify: "selectedVideoChanged"
             isReadonly: true
         }
+          Property {
+              name: "selectedVideoSourceKey"
+              type: "QString"
+              read: "selectedVideoSourceKey"
+              notify: "selectedVideoChanged"
+              isReadonly: true
+          }
         Property {
             name: "selectedFileName"
             type: "QString"
@@ -1723,6 +1730,16 @@ Module {
             Parameter { name: "glossary"; type: "QString" }
             Parameter { name: "style"; type: "QString" }
         }
+          Method {
+              name: "saveGeminiTranslationGuidance"
+              type: "bool"
+              Parameter { name: "project_key"; type: "QString" }
+              Parameter { name: "video_id"; type: "QString" }
+              Parameter { name: "instructions"; type: "QString" }
+              Parameter { name: "glossary"; type: "QString" }
+              Parameter { name: "style"; type: "QString" }
+              Parameter { name: "source_key"; type: "QString" }
+          }
         Signal { name: "speechRecognitionModelOptionsChanged" }
         Signal { name: "ttsVoiceChanged" }
         Signal { name: "ttsVoiceOptionsChanged" }

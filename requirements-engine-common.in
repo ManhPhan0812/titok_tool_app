@@ -7,3 +7,5 @@ pydantic==2.13.4
 # also consults a vendor wheel index containing stale transitive packages.
 idna==3.15
 urllib3==2.8.0
+certifi==2026.10.19
+Pillow==13.0.0

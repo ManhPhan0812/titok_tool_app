@@ -8,7 +8,8 @@ StudioButton {
     property string glossary: ""
     property string translationStyle: "balanced"
     property var saveHandler: null
-    property string contextKey: AppController.projectKey + ":" + AppController.selectedVideoId
+    property string sourceKey: AppController.selectedVideoSourceKey
+    property string contextKey: AppController.projectKey + ":" + AppController.selectedVideoId + ":" + root.sourceKey
     signal guidanceEdited(string instructions, string glossary, string style)
     text: qsTr("Văn phong & hướng dẫn")
     iconName: "edit"
@@ -25,7 +26,7 @@ StudioButton {
                     if (owner !== root.contextKey || !root.enabled)
                         return;
                     if (root.saveHandler !== null) {
-                        if (root.saveHandler(instructions, glossary, style))
+                        if (root.saveHandler(instructions, glossary, style, root.sourceKey))
                             dialog.close();
                     } else {
                         root.guidanceEdited(instructions, glossary, style);

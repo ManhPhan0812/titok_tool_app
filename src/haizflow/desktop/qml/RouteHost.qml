@@ -85,7 +85,7 @@ StackLayout {
     }
 
     Loader {
-        id: manualWorkspaceLoader
+        id: singleWorkspaceLoader
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.margins: 0
@@ -117,6 +117,7 @@ StackLayout {
     }
 
     Loader {
+        id: manualWorkspaceLoader
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.leftMargin: UiMetrics.pageMargin

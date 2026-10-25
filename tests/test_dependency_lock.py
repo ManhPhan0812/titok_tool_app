@@ -6,6 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import urldefrag
 
 
 class DependencyLockTests(unittest.TestCase):
@@ -20,7 +21,8 @@ class DependencyLockTests(unittest.TestCase):
         verifier = self._load_script("verify-dependency-lock")
         requirement, version = verifier._locked_requirements()["edge-tts"]
         self.assertEqual(version, "7.3.1")
-        self.assertEqual(requirement.url, verifier._source_pins()["edge-tts"]["url"])
+        self.assertEqual(urldefrag(requirement.url)[0], verifier._source_pins()["edge-tts"]["url"])
+        self.assertIn(urldefrag(requirement.url)[1], ("", "sha256=" + verifier._source_pins()["edge-tts"]["sha256"]))
         notices = self._load_script("generate-third-party-notices")
         self.assertIn("edge-tts", notices._locked_distributions(verifier.LOCK_PATH))
         runtime = self._load_script("verify-runtime")

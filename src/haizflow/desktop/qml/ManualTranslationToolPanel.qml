@@ -68,9 +68,9 @@ ColumnLayout {
         instructions: AppController.geminiTranslationInstructions
         glossary: AppController.geminiTranslationGlossary
         translationStyle: AppController.geminiTranslationStyle
-        saveHandler: function(instructions, glossary, style) {
+        saveHandler: function(instructions, glossary, style, sourceKey) {
             return AppController.saveGeminiTranslationGuidance(AppController.projectKey,
-                AppController.selectedVideoId, instructions, glossary, style);
+                AppController.selectedVideoId, instructions, glossary, style, sourceKey);
         }
     }
     SettingLabel {

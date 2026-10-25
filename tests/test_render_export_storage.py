@@ -341,9 +341,18 @@ class RenderExportStorageTests(unittest.TestCase):
 
     @unittest.skipUnless(os.name == "nt" and Path("D:/").is_dir() and Path("C:/").is_dir(), "Cross-volume Windows integration")
     def test_project_on_d_drive_exports_to_c_drive(self):
-        with tempfile.TemporaryDirectory(prefix="haizflow-cross-drive-", dir=Path.cwd() / "build") as directory:
+        from haizflow.config import NATIVE_WINDOWS_USERPROFILE
+
+        # The portable runtime redirects both tempfile and environment paths.
+        # Only this export fixture uses the preserved native Windows profile.
+        native_temp = Path(NATIVE_WINDOWS_USERPROFILE) / "AppData" / "Local" / "Temp"
+        if not native_temp.is_dir():
+            self.skipTest("Native Windows temporary directory is unavailable")
+        with (tempfile.TemporaryDirectory(prefix="haizflow-cross-drive-", dir=Path.cwd() / "build") as directory,
+              tempfile.TemporaryDirectory(prefix="haizflow-cross-drive-export-", dir=native_temp) as export_directory):
             self.assertEqual(Path(directory).drive.casefold(), "d:")
-            if self.external.drive.casefold() != "c:":
+            external = Path(export_directory)
+            if external.drive.casefold() != "c:":
                 self.skipTest("Cross-volume test requires TEMP on C: and workspace on D:")
             project = project_store.create_project("Cross drive", directory, "single")
             config = VideoConfig(project_name=project["project_name"], project_directory=directory, project_key=project["key"],
@@ -356,7 +365,7 @@ class RenderExportStorageTests(unittest.TestCase):
             (staging / "video.mp4").write_bytes(b"cross-drive-render")
             manual_artifacts.publish(video.video_id, "export", revision, staging, {"video": "video.mp4"}, config_fingerprint=revision)
             video = video_store.get_video(video.video_id)
-            target = self.external / "Cross drive.mp4"
+            target = external / "Cross drive.mp4"
             video_export.export_video(video, target)
             self.assertEqual(target.read_bytes(), b"cross-drive-render")
             project_store.delete_project_by_key(project["key"])

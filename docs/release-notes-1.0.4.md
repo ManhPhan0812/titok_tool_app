@@ -11,12 +11,16 @@
 - Cải thiện phản hồi và giao dịch xóa dự án, giữ hộp thoại trong trạng thái đang xóa cho tới khi hoàn tất.
 - VieNeu không còn chặn câu ngắn chỉ dựa trên thời lượng so với văn bản; vẫn kiểm tra waveform lỗi, im lặng và tín hiệu không hợp lệ. Chỉ thử lại có giới hạn khi audio thực sự không hợp lệ.
 - OmniVoice/VieNeu dùng theo dõi thời gian không có tiến triển thay vì giới hạn cố định cho toàn bộ video dài. Khi GPU gặp lỗi và chuyển CPU, tái sử dụng các câu đã hoàn thành thay vì tạo lại toàn bộ.
+- Thêm văn phong và hướng dẫn dịch Gemini, cải thiện nhất quán tên nhân vật/xưng hô. Khi thay nguồn, xóa hướng dẫn của video cũ; hộp thoại đang mở không được lưu nhầm sang nguồn mới.
+- Chặn VieNeu khi phụ đề còn chữ Hán và chỉ rõ câu cần sửa hoặc chọn công cụ giọng khác; không suy ngôn ngữ phụ đề từ video gốc.
+- Sửa đồng bộ ô nhập liệu khi đổi nguồn và trạng thái mở workspace thủ công. Giữ các kiểm tra cache, tiếp tục/chạy lại và Batch trong bộ kiểm thử hồi quy.
+- Cập nhật thư viện bảo mật Pillow, certifi, setuptools, filelock và OpenTelemetry; giữ nguyên các phiên bản model và định dạng dự án.
 
 ## Cập nhật trực tiếp từ 1.0.1
 
 Các bản **1.0.1, 1.0.2 và 1.0.3** có thể cập nhật trực tiếp lên **1.0.4** trong app. Release có Delta riêng cho từng bản và Full Core dự phòng. Người cài mới dùng **Setup.exe**, không giải nén ZIP Core cập nhật thay bộ cài.
 
-Sau cập nhật, mở **Gói tài nguyên** và cập nhật bộ xử lý **CPU 17 / GPU CUDA 19** để nhận các sửa lỗi TTS. Không phải tải lại model; OCR 8 vẫn dùng gói đã phát hành. Giữ nguyên release cũ, dự án và cache hợp lệ.
+Sau cập nhật, mở **Gói tài nguyên** và cập nhật bộ xử lý **CPU 17 / GPU CUDA 19 / OCR 9** để nhận các sửa lỗi TTS và thư viện bảo mật. Không phải tải lại model. Giữ nguyên release cũ, dự án và cache hợp lệ.
 
 Để nhận tối ưu launcher, lưu công việc, đóng HaizFlow rồi cài **Setup 1.0.4** vào đúng thư mục cài hiện tại. Không xóa `runtime` hoặc dự án. Việc kiểm tra đầy đủ Core vẫn được giữ, nên tốc độ mở còn phụ thuộc ổ đĩa và phần mềm bảo vệ trên từng máy.
 

@@ -48,15 +48,21 @@ def exercise(width, height, large, snapshot=""):
             property bool allowSave: false
             property string modelName: "q4"
             property string ownerKey: "project:a"
+            property string sourceRevision: "source-0"
+            property string instructionsValue: "Bối cảnh hiện đại."
+            property string glossaryValue: "Minh: tôi – cậu."
+            property string savedSource: ""
             GeminiGuidanceButton {
                 objectName: "guidanceButton"
                 visible: testWindow.modelName.startsWith("gemini-")
-                contextKey: testWindow.ownerKey
-                instructions: "Bối cảnh hiện đại."
-                glossary: "Minh: tôi – cậu."
-                saveHandler: function(instructions, glossary, style) {
+                sourceKey: testWindow.sourceRevision
+                contextKey: testWindow.ownerKey + ":" + sourceKey
+                instructions: testWindow.instructionsValue
+                glossary: testWindow.glossaryValue
+                saveHandler: function(instructions, glossary, style, sourceKey) {
                     testWindow.attempts += 1;
                     testWindow.savedStyle = style;
+                    testWindow.savedSource = sourceKey;
                     return testWindow.allowSave;
                 }
             }
@@ -131,12 +137,32 @@ def exercise(width, height, large, snapshot=""):
     button.clicked.emit()
     QTest.qWait(30)
     editor = window.findChild(QObject, "geminiGuidanceDialog")
-    assert editor.property("owner") == "project:b"
+    assert editor.property("owner") == "project:b:source-0"
     window.setProperty("allowSave", True)
     editor.findChild(QObject, "saveGeminiGuidance").clicked.emit()
     QTest.qWait(30)
     assert window.property("attempts") == 2
     assert not window.findChild(QObject, "geminiGuidanceDialog")
+    # A successful replacement preserves video/project IDs but invalidates
+    # any guidance editor opened while the asynchronous import was running.
+    button.clicked.emit()
+    QTest.qWait(30)
+    editor = window.findChild(QObject, "geminiGuidanceDialog")
+    assert editor and editor.property("visible")
+    window.setProperty("instructionsValue", "")
+    window.setProperty("glossaryValue", "")
+    window.setProperty("sourceRevision", "source-1")
+    QTest.qWait(30)
+    assert not window.findChild(QObject, "geminiGuidanceDialog")
+    assert window.property("attempts") == 2
+    button.clicked.emit()
+    QTest.qWait(30)
+    editor = window.findChild(QObject, "geminiGuidanceDialog")
+    assert editor.findChild(QObject, "geminiInstructionsEditor").property("text") == ""
+    editor.findChild(QObject, "saveGeminiGuidance").clicked.emit()
+    QTest.qWait(30)
+    assert window.property("attempts") == 3
+    assert window.property("savedSource") == "source-1"
     assert not warnings, warnings
     window.close()
     window.deleteLater()

@@ -1568,6 +1568,10 @@ class HaizFlowController(QObject):
         from haizflow.services.subtitle_import import has_import, voice_notice
 
         video = self._selected_video() if callable(getattr(self, "_selected_video", None)) else None
+        notice = unsupported_language_notice(provider, language_code, getattr(self, "_settings_language", "vi"))
+        if notice and not (video and has_import(video)):
+            HaizFlowController._show_app_alert(self, *notice, "warning")
+            return False
         if video and (has_import(video) or (
             str(provider).startswith("vieneu") and getattr(video, "project_type", "") == "manual"
         )):
@@ -2415,6 +2419,17 @@ class HaizFlowController(QObject):
     def selectedVideoId(self):
         return str(self._selected_video_id or "")
 
+    @staticmethod
+    def _video_source_key(video):
+        if video is None:
+            return ""
+        generation = dict(getattr(video, "manual_tool_generations", {}) or {}).get("source", 0)
+        return f"{video.video_id}:{getattr(video, 'created_at', '')}:{generation}"
+
+    @Property(str, notify=selectedVideoChanged)
+    def selectedVideoSourceKey(self):
+        return HaizFlowController._video_source_key(self._selected_video())
+
     @Property(bool, notify=projectSetupChanged)
     def hasOpenProject(self):
         if not self._selected_project_key:
@@ -3227,10 +3242,16 @@ class HaizFlowController(QObject):
 
     @Slot(str, str, str, str, result=bool)
     @Slot(str, str, str, str, str, result=bool)
-    def saveGeminiTranslationGuidance(self, project_key, video_id, instructions, glossary, style=""):
+    @Slot(str, str, str, str, str, str, result=bool)
+    def saveGeminiTranslationGuidance(self, project_key, video_id, instructions, glossary, style="", source_key=""):
         if (str(project_key or "") != str(self._selected_project_key or "")
                 or str(video_id or "") != str(self._selected_video_id or "")
                 or video_id and self._processing_queue.contains(video_id)):
+            return False
+        imports = getattr(self, "_project_import", None)
+        if video_id and imports is not None and imports.is_replacing_video(video_id):
+            return False
+        if source_key and source_key != HaizFlowController._video_source_key(video_store.get_video(video_id)):
             return False
         if max(len(instructions), len(glossary)) > 4000:
             self._show_app_alert("Hướng dẫn dịch", "Mỗi ô chỉ được dài tối đa 4000 ký tự.", "warning")

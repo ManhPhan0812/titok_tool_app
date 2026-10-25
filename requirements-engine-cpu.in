@@ -22,3 +22,6 @@ audioop-lts==0.2.2
 multidict==6.9.1
 # Match the Core transport; fixes the 3.14.3 client/server advisories.
 aiohttp==3.14.5
+# Security-fixed transitive dependencies; keep unrelated model packages pinned.
+filelock==4.2.1
+opentelemetry-api==1.45.1

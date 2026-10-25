@@ -13,11 +13,11 @@
   "effective_release": "1.0.4 reviewed Douyin transport, TTS, subtitle editing, cache and startup patch; publication tracked by GitHub release state",
   "public_release_review": {
     "approved_by": "Codex (scoped technical packaging review, not independent legal certification)",
-    "approved_at": "2026-10-24",
-    "source_commit": "2541f77 (review baseline including f9a4a7e; final release commit is bound by BUILD-INFO)",
+    "approved_at": "2026-10-25",
+    "source_commit": "852a888 plus audited UI corrections and security dependency patches (final release commit is bound by BUILD-INFO)",
     "release_version": "1.0.4",
     "owner_release_authorization": "Direct owner request to build and publish 1.0.4 with updates from 1.0.1. Also support 1.0.2/1.0.3 and preserve earlier releases/assets.",
-    "publication_condition": "Retain unchanged ThirdPartySources 1.0.0 and all earlier assets. Rebuild CPU 17/CUDA 19 with unchanged reviewed dependency locks and retain vision 8. Pin measured archive sizes/hashes at new immutable 1.0.4 URLs. Build Core and new bootstrap from the same clean final commit. Verify full source/QML gates, native engine and packaged Douyin transport smoke, installer, frozen Full/Delta upgrades from 1.0.1 onward, health, rollback, data preservation and public asset digest/download checks. No new library, model, voice preview, font, artwork or media recipe. Preserve unsigned-build caveats and existing license restrictions. Scoped technical review, not independent legal certification or an all-machine claim.",
+    "publication_condition": "Retain unchanged ThirdPartySources 1.0.0 for unchanged FFmpeg/Qt and all earlier assets. Rebuild CPU 17/CUDA 19/vision 9 with security-fixed Pillow 13.0.0, certifi 2026.10.19, filelock 4.2.1 and OpenTelemetry API 1.45.1 as applicable; Core/build setuptools 84.1.0. Preserve complete wheel and bundled component license notices. Edge TTS archive endpoint changes but source commit and bytes remain identical. Pin measured archive sizes/hashes at new immutable 1.0.4 URLs. Build Core and new bootstrap from the same clean final commit. Verify full source/QML gates, native engine and packaged Douyin transport smoke, installer, frozen Full/Delta upgrades from 1.0.1 onward, health, rollback, data preservation and public asset digest/download checks. No new model, voice preview, font, artwork or media recipe. Preserve unsigned-build caveats and existing license restrictions. Scoped technical review, not independent legal certification or an all-machine claim.",
     "clearances": {
       "owned-code-and-contributor-scope": {
         "path": "legal/reviews/application-scope-2026-10-06.md",
@@ -29,7 +29,7 @@
       },
       "ffmpeg-complete-corresponding-source": {
         "path": "legal/reviews/media-source-1.0.4.md",
-        "sha256": "8221d88f37ddff6d604510835350e4499351aa8e46cb10ed41623aae3785a958"
+        "sha256": "a04a486d0aa567f28754235d5a4b74b674c58d86dd8261abaea06b9dfb41d40d"
       },
       "qt-lgpl-module-and-relinking-evidence": {
         "path": "legal/reviews/qt-replacement-2026-10-06.md",

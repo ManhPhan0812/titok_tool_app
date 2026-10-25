@@ -81,7 +81,7 @@ def _locked_requirements() -> dict[str, tuple[Requirement, str]]:
             # Source entries are allowed only with an explicitly reviewed
             # version, full upstream commit and the one exact archive hash.
             if (url != pin.get("url")
-                    or not re.fullmatch(r"https://codeload\.github\.com/[^/]+/[^/]+/tar\.gz/[0-9a-f]{40}", url)
+                    or not re.fullmatch(r"https://github\.com/[^/]+/[^/]+/archive/[0-9a-f]{40}\.tar\.gz", url)
                     or not re.fullmatch(r"[0-9a-f]{64}", digest)
                     or set(HASH_PATTERN.findall(logical)) != {digest}
                     or fragment not in {"", "sha256=" + digest}

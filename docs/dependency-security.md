@@ -9,6 +9,22 @@ This policy defines the trust boundary for Python packages, native tools, and mo
 
 ## Mandatory audit
 
+### 1.0.4 security refresh (2026-10-25)
+
+The release audit identified new advisories in the previous locks. Fixed pins:
+Pillow 13.0.0, certifi 2026.10.19 and setuptools 84.1.0 in Core/build tooling;
+Pillow/certifi in every engine; filelock 4.2.1 and opentelemetry-api 1.45.1 in
+CPU/CUDA engines. No new advisory exception was added. Other locked package
+versions and model artifacts are unchanged. Edge TTS's GitHub archive URL now
+has a `.tar.gz` extension for resolver compatibility; its commit and verified
+archive SHA-256 are unchanged. Complete wheel license texts remain mandatory.
+
+Upstream evidence: [Pillow](https://pillow.readthedocs.io/en/stable/releasenotes/13.0.0.html),
+[certifi](https://github.com/certifi/python-certifi/security/advisories/GHSA-6q48-6c7w-9gw2),
+[setuptools](https://github.com/pypa/setuptools/security/advisories/GHSA-xmj3-9gf7-h52w),
+[filelock](https://github.com/tox-dev/filelock/releases/tag/4.2.1),
+[OpenTelemetry](https://github.com/open-telemetry/opentelemetry-python/security/advisories/GHSA-xcq7-p3pf-p88h).
+
 Every release candidate must run:
 
 ```powershell

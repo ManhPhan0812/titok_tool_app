@@ -30,12 +30,13 @@ class QmlMenuTests(unittest.TestCase):
                 state = QQmlPropertyMap()
                 for key, value in {"isProcessing": False, "isSwitchingProcessingDevice": False,
                                    "hasSelectedVideo": True, "canEditSelectedVideo": True,
-                                   "translationModel": "q4"}.items():
+                                   "translationModel": "q4", "textProcessingEnabled": True}.items():
                     state.insert(key, value)
                 engine.rootContext().setContextProperty("TestController", state)
                 component = QQmlComponent(engine)
                 component.setData(('import QtQuick\nimport QtQuick.Layouts\nimport "."\nItem { id: root;'
                     'property bool editable: TestController.canEditSelectedVideo && TestController.hasSelectedVideo;'
+                    'property bool textProcessingEnabled: TestController.textProcessingEnabled;'
                     'property var inspector: ({editable: root.editable, scheduleSave: function() {}});'
                     'property string translationModel: TestController.translationModel;'
                     'signal translationModelEdited(string value);'
@@ -65,6 +66,11 @@ class QmlMenuTests(unittest.TestCase):
                     self.assertFalse(picker.isEnabled())
                     state.insert("isSwitchingProcessingDevice", False)
                     self.assertTrue(picker.isEnabled())
+                    if filename == "ProcessingSettingsForm.qml":
+                        state.insert("textProcessingEnabled", False)
+                        self.assertFalse(picker.isEnabled())
+                        state.insert("textProcessingEnabled", True)
+                        self.assertTrue(picker.isEnabled())
                     state.insert("hasSelectedVideo", False)
                     self.assertFalse(picker.isEnabled())
                 finally:

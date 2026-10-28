@@ -164,6 +164,7 @@ class ManualEditorSessionTests(unittest.TestCase):
         self.assertEqual(
             set(HaizFlowController._EDITABLE_VIDEO_SETTING_FIELDS),
             {
+                "automatic_output_mode",
                 "target_language",
                 "speech_recognition_model",
                 "translation_model",

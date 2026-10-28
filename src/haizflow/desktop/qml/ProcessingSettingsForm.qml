@@ -14,8 +14,9 @@ GridLayout {
     property bool showCloneAction: false
     property bool showMusicPlaybackSettings: true
     property real availableHeight: 0
-    readonly property real voiceSpacing: Math.max(Theme.space8, Math.min(Theme.space20,
-        Theme.space8 + (availableHeight - 500) / 18))
+    readonly property real voiceSpacing: Math.max(showAutomaticOutputMode ? Theme.space4 : Theme.space8,
+        Math.min(Theme.space20, (showAutomaticOutputMode ? Theme.space4 : Theme.space8)
+            + (availableHeight - 500) / 18))
     readonly property real mediaSpacing: Math.max(3, Math.min(Theme.space16,
         3 + (availableHeight - 500) / 24))
     property string speechRecognitionModel: "small"

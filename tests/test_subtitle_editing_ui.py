@@ -142,6 +142,7 @@ ManualEditorToolbar {
             "processingDevice": "cpu", "canEditSelectedVideo": True, "cpuOnly": True,
             "hasSelectedVideo": False, "isSelectedVideoQueued": False, "videoPath": "",
             "speechRecognitionModel": "small", "translationModel": "auto", "targetLanguage": "vi",
+            "automaticOutputMode": "subtitles_and_voice",
             "ttsProvider": "edge", "ttsVoice": "", "speakerMode": "single", "watermarkKind": "text",
             "removeOriginalSubtitles": True, "originalSubtitleRemovalMode": "patch",
             "enableAudioSeparation": True, "backgroundMusicPath": "", "backgroundMusicLoop": True,

@@ -19,6 +19,19 @@ from haizflow.update.packages import generate
 from haizflow.update.state import Layout
 
 
+def synthetic_version(core: Path, target: str) -> None:
+    """Keep the synthetic slot consistent with the real Core version guard."""
+    info_path = core / "BUILD-INFO.json"
+    info = json.loads(info_path.read_text(encoding="utf-8"))
+    info["version"] = target
+    info["build_id"] = target + "+" + info["git_commit"][:12]
+    atomic_json(info_path, info)
+    rows = inventory(core, hash_workers=12)
+    (core / "SHA256SUMS.txt").write_text("".join(
+        f"{row['sha256']} *{row['path']}\n" for row in rows
+        if row["path"] != "SHA256SUMS.txt"), encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifact", type=Path, required=True)
@@ -101,6 +114,7 @@ def main():
             layout.prepare(args.update_package, manifest)
         else:
             (source / "delta-fixture.txt").write_bytes(b"NEW CORE FIXTURE DATA")
+            synthetic_version(source, target_version)
             manifest = generate(layout.core(base_version), source, assets,
                                 base_version=base_version, target_version=target_version)
             layout.prepare(assets / manifest.data["package_name"], manifest)
@@ -128,6 +142,7 @@ def main():
 
         # A checksum-valid but unlaunchable future Core must roll back once.
         (source / "HaizFlowCore.exe").write_bytes(b"INTENTIONALLY NOT A WINDOWS EXECUTABLE")
+        synthetic_version(source, broken_version)
         broken = generate(layout.core(target_version), source, assets,
                           base_version=target_version, target_version=broken_version)
         layout.prepare(assets / broken.data["package_name"], broken)

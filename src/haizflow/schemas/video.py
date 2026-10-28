@@ -6,6 +6,16 @@ VIDEO_METADATA_SCHEMA_VERSION = 19
 VIDEO_METADATA_TYPE = "haizflow.video"
 SUBTITLE_FONT_FAMILY = "Bangers"
 WorkflowMode = Literal["A", "review"]
+AutomaticOutputMode = Literal["subtitles_and_voice", "subtitles_only", "voice_only", "original"]
+
+
+def automatic_outputs(video) -> tuple[bool, bool]:
+    """Translated captions and dubbing selected for an automatic project."""
+    mode = (getattr(video, "automatic_output_mode", "subtitles_and_voice")
+            if getattr(video, "project_type", "single") == "single" else "subtitles_and_voice")
+    return mode in {"subtitles_and_voice", "subtitles_only"}, mode in {"subtitles_and_voice", "voice_only"}
+
+
 TranslatorProvider = Literal["hymt2", "gemini"]
 TranslationModel = Literal["auto", "q4", "full", "gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.8-flash"]
 GeminiTranslationStyle = Literal["balanced", "literal", "natural", "adaptive"]
@@ -80,6 +90,7 @@ class CropSettings(BaseModel):
 
 class VideoConfig(BaseModel):
     mode: WorkflowMode = "A"  # A = full auto, review = pause after translation.
+    automatic_output_mode: AutomaticOutputMode = "subtitles_and_voice"
     source_language: str = "auto"  # Automatic detection is performed for every speech segment.
     target_language: str = "vi"
     translator_provider: TranslatorProvider = "hymt2"
@@ -142,6 +153,7 @@ class VideoInfo(BaseModel):
     video_id: str
     original_filename: str
     mode: WorkflowMode
+    automatic_output_mode: AutomaticOutputMode = "subtitles_and_voice"
     source_language: str
     target_language: str
     # Language of the published Manual text, not the next translation choice.

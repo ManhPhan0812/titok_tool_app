@@ -22,6 +22,12 @@ InspectorPanel {
         ProcessingSettingsForm {
             id: settingsForm
             objectName: "autoProcessingSettingsForm"
+            showAutomaticOutputMode: true
+            automaticOutputMode: AppController.automaticOutputMode
+            onAutomaticOutputModeEdited: function(value) {
+                AppController.automaticOutputMode = value;
+                root.scheduleVideoSettingsSave();
+            }
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: implicitHeight

@@ -838,6 +838,13 @@ Module {
             index: 62
         }
         Property {
+            name: "automaticOutputMode"
+            type: "QString"
+            read: "automaticOutputMode"
+            write: "automaticOutputMode"
+            notify: "automaticOutputModeChanged"
+        }
+        Property {
             name: "originalVolume"
             type: "int"
             read: "originalVolume"
@@ -1747,6 +1754,7 @@ Module {
         Signal { name: "ttsProviderOptionsChanged" }
         Signal { name: "speakerModeChanged" }
         Signal { name: "enableAudioSeparationChanged" }
+        Signal { name: "automaticOutputModeChanged" }
         Signal { name: "outputFormatChanged" }
         Signal { name: "outputSpeedChanged" }
         Property {

@@ -13,7 +13,7 @@ from haizflow.core.model_integrity import (
     ModelIntegrityError,
     verify_demucs_model,
 )
-from haizflow.core.paths import is_frozen
+from haizflow.core.paths import engine_environment, is_frozen
 from haizflow.services.video_store import log_to_video
 from haizflow.pipeline.process_registry import check_cancellation, communicate_process
 from haizflow.services.external_tasks import run_external_task
@@ -124,7 +124,7 @@ def separate_audio(audio_path: str, output_dir: str, video_id: str) -> tuple[str
     log_to_video(video_id, f"Running Demucs command: {' '.join(cmd)}")
     
     check_cancellation(video_id)
-    demucs_environment = os.environ.copy()
+    demucs_environment = engine_environment()
     # Demucs 4.0.1 does not pass weights_only=False explicitly. PyTorch 2.6+
     # changed torch.load's default to True, which rejects the official Demucs
     # package (it contains the model class as well as tensors). This override is

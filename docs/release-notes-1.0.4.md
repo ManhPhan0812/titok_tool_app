@@ -1,27 +1,30 @@
-# HaizFlow 1.0.4
+# HaizFlow 1.0.4 — bản fork của ManhPhan0812
 
-[Tải bộ cài Windows](https://github.com/MachHongHai/HaizFlow/releases/download/v1.0.4/HaizFlow-1.0.4-Setup.exe)
+Bản fork dựa trên HaizFlow 1.0.4 của Mạch Hồng Hải, kèm các thay đổi riêng trong repository `ManhPhan0812/titok_tool_app`.
 
-## Sửa lỗi và cải tiến
+## Cài đặt
 
-- Sửa lỗi `'impersonate'` khi tải video Douyin hoặc tải video trong kênh. Bước tải media dùng cùng cấu hình mạng tương thích với phiên Douyin; không đổi UA/cookie hay chỉnh cấu hình mạng toàn cục sau khi yt-dlp khởi tạo. Thêm kiểm tra cấu hình tải vào kiểm định bản đóng gói.
-- Tối ưu xác minh Core lúc mở app: bỏ lượt kiểm tra trùng và đọc song song có giới hạn, vẫn kiểm tra đầy đủ SHA-256, file thừa/thiếu và junction. Launcher mới nằm trong bộ Setup; cập nhật Core trong app không tự thay launcher cũ.
-- Cải tiến trình chỉnh sửa phụ đề và vùng theo dõi nội dung; sửa thao tác sửa/gộp/xóa câu làm mất giọng các câu không bị ảnh hưởng trong một số dự án cũ.
-- Sửa cache preview OCR khi thay đổi và khôi phục cấu hình khung hình; giảm xử lý lại không cần thiết khi mở dự án.
-- Cải thiện phản hồi và giao dịch xóa dự án, giữ hộp thoại trong trạng thái đang xóa cho tới khi hoàn tất.
-- VieNeu không còn chặn câu ngắn chỉ dựa trên thời lượng so với văn bản; vẫn kiểm tra waveform lỗi, im lặng và tín hiệu không hợp lệ. Chỉ thử lại có giới hạn khi audio thực sự không hợp lệ.
-- OmniVoice/VieNeu dùng theo dõi thời gian không có tiến triển thay vì giới hạn cố định cho toàn bộ video dài. Khi GPU gặp lỗi và chuyển CPU, tái sử dụng các câu đã hoàn thành thay vì tạo lại toàn bộ.
-- Thêm văn phong và hướng dẫn dịch Gemini, cải thiện nhất quán tên nhân vật/xưng hô. Khi thay nguồn, xóa hướng dẫn của video cũ; hộp thoại đang mở không được lưu nhầm sang nguồn mới.
-- Chặn VieNeu khi phụ đề còn chữ Hán và chỉ rõ câu cần sửa hoặc chọn công cụ giọng khác; không suy ngôn ngữ phụ đề từ video gốc.
-- Sửa đồng bộ ô nhập liệu khi đổi nguồn và trạng thái mở workspace thủ công. Giữ các kiểm tra cache, tiếp tục/chạy lại và Batch trong bộ kiểm thử hồi quy.
-- Cập nhật thư viện bảo mật Pillow, certifi, setuptools, filelock và OpenTelemetry; giữ nguyên các phiên bản model và định dạng dự án.
+[Tải HaizFlow-1.0.4-Setup.exe](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.4/HaizFlow-1.0.4-Setup.exe). Người cài mới chỉ cần bộ cài; các tệp Core ZIP và manifest dành cho cập nhật trong app.
 
-## Cập nhật trực tiếp từ 1.0.1
+Windows 10/11 x64. Bộ cài chưa ký Authenticode; Windows có thể cảnh báo hoặc chặn theo chính sách.
 
-Các bản **1.0.1, 1.0.2 và 1.0.3** có thể cập nhật trực tiếp lên **1.0.4** trong app. Release có Delta riêng cho từng bản và Full Core dự phòng. Người cài mới dùng **Setup.exe**, không giải nén ZIP Core cập nhật thay bộ cài.
+## Thay đổi riêng
 
-Sau cập nhật, mở **Gói tài nguyên** và cập nhật bộ xử lý **CPU 17 / GPU CUDA 19 / OCR 9** để nhận các sửa lỗi TTS và thư viện bảo mật. Không phải tải lại model. Giữ nguyên release cũ, dự án và cache hợp lệ.
+- Chế độ Tự động có bốn lựa chọn nội dung xuất: phụ đề và lồng tiếng, chỉ phụ đề, chỉ lồng tiếng, hoặc không phụ đề và không lồng tiếng. Khi tắt lồng tiếng, giữ âm thanh gốc theo mức âm lượng đã chọn. Phụ đề đã có sẵn trong hình ảnh được xử lý bằng tùy chọn che phụ đề riêng.
+- Sửa môi trường chạy bộ xử lý khi mở source bằng `Chay-HaizFlow.bat`.
+- Giải phóng video preview trước khi xóa dự án để tránh file còn bị khóa.
+- Khôi phục SDK VieNeu khi thư mục runtime cũ bị từ chối truy cập, có kiểm tra toàn vẹn và giữ bản sao dự phòng.
+- Chuyển kênh cập nhật Core và bộ cài sang repository của bản fork. Các gói tài nguyên được ghim tiếp tục sử dụng URL trong catalog.
+- Loại trừ dữ liệu runtime, cấu hình cá nhân, model và cache khỏi mã nguồn phát hành.
 
-Để nhận tối ưu launcher, lưu công việc, đóng HaizFlow rồi cài **Setup 1.0.4** vào đúng thư mục cài hiện tại. Không xóa `runtime` hoặc dự án. Việc kiểm tra đầy đủ Core vẫn được giữ, nên tốc độ mở còn phụ thuộc ổ đĩa và phần mềm bảo vệ trên từng máy.
+## Chuyển từ bản gốc hoặc bản build cũ
 
-Windows 10/11 x64. Bản phát hành **chưa ký Authenticode**; Windows có thể cảnh báo hoặc chặn theo chính sách. Không tắt phần mềm bảo vệ. Giới hạn giấy phép, gồm checkpoint OmniVoice phi thương mại, vẫn áp dụng. Không thêm nhà cung cấp API dịch/TTS mới trong bản này.
+Cài bộ Setup này để chuyển kênh cập nhật sang bản fork. EXE cũ vẫn giữ địa chỉ cập nhật được nhúng khi build. Hai bản cùng số `1.0.4` không tự cập nhật cho nhau; các release tiếp theo của bản fork cần tăng số phiên bản.
+
+Lưu công việc, đóng app và giữ bản sao dự án trước khi nâng cấp. Không xóa `runtime` hoặc thư mục dự án. Full Core được cung cấp cho cập nhật; bản phát hành đầu tiên của fork không có Delta từ các bản gốc.
+
+## Giấy phép và nguồn thư viện
+
+Giữ nguyên thông báo tác giả và giấy phép HaizFlow Source-Available 1.0 cùng giấy phép của các thành phần. Đây là bản fork, không phải bản phát hành chính thức của tác giả gốc. Điều kiện riêng của model, gồm checkpoint OmniVoice phi thương mại, vẫn áp dụng.
+
+[Nguồn thư viện tương ứng](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.4/HaizFlow-1.0.4-ThirdPartySources.zip) được cung cấp cùng release.

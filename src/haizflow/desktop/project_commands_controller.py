@@ -123,11 +123,24 @@ class ProjectCommandsController:
         host = self._host
         preview = getattr(host, "_editor_preview", None)
         owned_ids = {video.video_id for video in videos}
+        # Python preview teardown does not close QML's native source player.
+        # Use the same detach boundary as source replacement before clearing
+        # preview state, so fallback bindings cannot reopen the source while
+        # the deletion worker renames its containing directory on Windows.
+        signal = getattr(host, "sourceReplacementRequested", None)
+        if signal is not None:
+            for video_id in sorted(owned_ids):
+                signal.emit(video_id)
         if (getattr(host, "_selected_project_key", "") == project_key
                 or getattr(preview, "_pinned_video_id", "") in owned_ids):
             release = getattr(host, "releaseEditorPreview", None)
             if callable(release):
                 release()
+        if (getattr(host, "_selected_project_key", "") == project_key
+                or getattr(host, "_selected_video_id", "") in owned_ids):
+            audio_preview = getattr(host, "_audio_preview", None)
+            if audio_preview is not None:
+                audio_preview.invalidate()
 
     def __init__(self, host, *, create_video=None):
         self._host = host
@@ -515,6 +528,7 @@ class ProjectCommandsController:
     @staticmethod
     def _resources_ready_for_videos(host, videos) -> bool:
         from haizflow.core.model_choices import gpu_choice_blocked, heavy_gpu_choice_blocked, models_for_device, project_translation_choice
+        from haizflow.schemas.video import automatic_outputs
 
         if getattr(getattr(host, "_resource_packs", None), "storageMoving", False):
             host.appAlertRequested.emit("Đang chuyển gói tài nguyên", "Hãy chờ chuyển vị trí hoàn tất trước khi xử lý.", "info")
@@ -529,6 +543,8 @@ class ProjectCommandsController:
         from haizflow.core.vieneu_voices import unsupported_language_notice
 
         for video in videos:
+            if not automatic_outputs(video)[1]:
+                continue
             notice = unsupported_language_notice(
                 getattr(video, "tts_provider", getattr(host, "_tts_provider", "omnivoice")),
                 getattr(video, "target_language", getattr(host, "_target_language", "vi")),
@@ -550,14 +566,18 @@ class ProjectCommandsController:
                     videos[index] = video_store.update_video(video.video_id, **changes) or video
 
         for video in videos:
+            subtitles_enabled, dubbing_enabled = automatic_outputs(video)
+            needs_text = subtitles_enabled or dubbing_enabled
             if gpu_choice_blocked(str(getattr(host, "_settings_processing_device", "cpu")),
-                                  recognition=getattr(video, "speech_recognition_model", getattr(host, "_speech_recognition_model", "small")),
-                                  translation=getattr(video, "translation_model", getattr(host, "_translation_model", "auto")),
-                                  voice=getattr(video, "tts_provider", getattr(host, "_tts_provider", "omnivoice"))):
+                                  recognition=(getattr(video, "speech_recognition_model", getattr(host, "_speech_recognition_model", "small")) if needs_text else "small-cpu"),
+                                  translation=(getattr(video, "translation_model", getattr(host, "_translation_model", "auto")) if needs_text else "q4"),
+                                  voice=(getattr(video, "tts_provider", getattr(host, "_tts_provider", "omnivoice")) if dubbing_enabled else "edge")):
                 host.appAlertRequested.emit("Đang dùng chế độ CPU", "Dự án đang chọn model GPU. Chọn model CPU hoặc chuyển sang GPU trong Cài đặt → Chung.", "warning")
                 return False
         device = str(getattr(host, "_settings_processing_device", "cpu"))
         for video in videos:
+            if not any(automatic_outputs(video)):
+                continue
             recognition = str(getattr(video, "speech_recognition_model", getattr(host, "_speech_recognition_model", "small")))
             translation = project_translation_choice(
                 str(getattr(video, "translation_model", getattr(host, "_translation_model", "q4"))),
@@ -569,7 +589,8 @@ class ProjectCommandsController:
                     "warning",
                 )
                 return False
-        if any(str(getattr(video, "translation_model", "")).startswith("gemini-") for video in videos if video):
+        if any(str(getattr(video, "translation_model", "")).startswith("gemini-")
+               and any(automatic_outputs(video)) for video in videos if video):
             from haizflow.services.gemini_translation import key_configured
 
             if not key_configured():
@@ -579,7 +600,7 @@ class ProjectCommandsController:
                 host.appAlertRequested.emit(title, message, "warning")
                 return False
         for video in videos:
-            if video and getattr(video, "tts_voice", "") in {"omnivoice:clone", "vieneu:clone"}:
+            if video and automatic_outputs(video)[1] and getattr(video, "tts_voice", "") in {"omnivoice:clone", "vieneu:clone"}:
                 reference = str((getattr(video, "files", None) or {}).get("voice_reference") or "")
                 try:
                     has_sample = bool(reference and os.path.isfile(reference) and os.path.getsize(reference) > 0)
@@ -614,8 +635,11 @@ class ProjectCommandsController:
                     getattr(video, "tts_provider", None) or getattr(host, "_tts_provider", "omnivoice")
                 ),
             }
-            capabilities = ["recognition", "translation", "voice"]
-            if bool(getattr(video, "enable_audio_separation", getattr(host, "_enable_audio_separation", False))):
+            subtitles_enabled, dubbing_enabled = automatic_outputs(video)
+            capabilities = ["recognition", "translation"] if subtitles_enabled or dubbing_enabled else []
+            if dubbing_enabled:
+                capabilities.append("voice")
+            if dubbing_enabled and bool(getattr(video, "enable_audio_separation", getattr(host, "_enable_audio_separation", False))):
                 capabilities.append("separation")
             from haizflow.services.ocr_regions import effective_region
             if (bool(getattr(video, "remove_original_subtitles", getattr(host, "_remove_original_subtitles", False)))

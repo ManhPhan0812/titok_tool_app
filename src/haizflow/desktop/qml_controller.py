@@ -120,6 +120,7 @@ class HaizFlowController(QObject):
     _THUMBNAIL_RETRY_MAX_ATTEMPTS = 3
     _THUMBNAIL_RETRY_INITIAL_DELAY_SECONDS = 15.0
     _EDITABLE_VIDEO_SETTING_FIELDS = (
+        "automatic_output_mode",
         "target_language",
         "speech_recognition_model",
         "translation_model",
@@ -169,6 +170,7 @@ class HaizFlowController(QObject):
     ttsVoiceOptionsChanged = Signal()
     speakerModeChanged = Signal()
     enableAudioSeparationChanged = Signal()
+    automaticOutputModeChanged = Signal()
     originalVolumeChanged = Signal()
     backgroundMusicVolumeChanged = Signal()
     audioMixOptionsChanged = Signal()
@@ -277,6 +279,7 @@ class HaizFlowController(QObject):
         self._tts_voice = "vieneu:Hải Đăng"
         self._speaker_mode = "single"
         self._enable_audio_separation = True
+        self._automatic_output_mode = "subtitles_and_voice"
         self._output_format = "keep_ratio"
         self._output_speed = 1.0
         self._original_volume = 60
@@ -1826,6 +1829,18 @@ class HaizFlowController(QObject):
         if self._enable_audio_separation != value:
             self._enable_audio_separation = value
             self.enableAudioSeparationChanged.emit()
+
+    @Property(str, notify=automaticOutputModeChanged)
+    def automaticOutputMode(self):
+        return self._automatic_output_mode
+
+    @automaticOutputMode.setter
+    def automaticOutputMode(self, value):
+        if value not in {"subtitles_and_voice", "subtitles_only", "voice_only", "original"}:
+            return
+        if value != self._automatic_output_mode:
+            self._automatic_output_mode = value
+            self.automaticOutputModeChanged.emit()
 
     @Property(int, notify=originalVolumeChanged)
     def originalVolume(self):
@@ -7157,6 +7172,7 @@ class HaizFlowController(QObject):
     @staticmethod
     def _video_config_from_snapshot(video, snapshot: dict[str, object]) -> VideoConfig:
         values = {
+            "automatic_output_mode": getattr(video, "automatic_output_mode", "subtitles_and_voice"),
             "mode": video.mode,
             "source_language": video.source_language,
             "target_language": video.target_language,
@@ -7468,6 +7484,8 @@ class HaizFlowController(QObject):
             output_speed=getattr(self, "_output_speed", 1.0),
             crop=self._crop_settings,
             enable_audio_separation=self._enable_audio_separation,
+            automatic_output_mode=(getattr(self, "_automatic_output_mode", "subtitles_and_voice")
+                                   if self._project_type == "single" else "subtitles_and_voice"),
             original_video_volume=self._original_volume,
             background_music_volume=self._background_music_volume,
             background_music_loop=getattr(self, "_background_music_loop", True),
@@ -7614,6 +7632,7 @@ class HaizFlowController(QObject):
         manual_audio_tracks_to_sync: set[str] = set()
         manual_visual_sections_to_sync: set[str] = set()
         changes = {
+            "automatic_output_mode": config.automatic_output_mode,
             "mode": config.mode,
             "source_language": config.source_language,
             "target_language": config.target_language,

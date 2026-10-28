@@ -5,6 +5,7 @@ from unittest.mock import Mock
 import pytest
 
 from haizflow import config
+from haizflow.core import paths
 from haizflow.pipeline import omnivoice_tts, vieneu_tts
 from haizflow.pipeline import process_registry as registry
 
@@ -70,6 +71,18 @@ def test_progressing_vieneu_child_outlives_whole_request_deadline(run_synthesis,
     run(device=device)
     assert all(path.read_bytes() == b"verified mp3 checkpoint" for path in outputs)
     assert not registry._active_processes.get(key)
+
+
+def test_vieneu_child_receives_engine_runtime_environment(run_synthesis, monkeypatch):
+    environment = paths.engine_environment()
+    environment["HAIZFLOW_ENV_REGRESSION"] = "source-runtime"
+    monkeypatch.setattr(paths, "engine_environment", lambda: environment.copy())
+    monkeypatch.setattr(sys.modules[__name__], "CHILD", (
+        "import os; assert os.environ.get('HAIZFLOW_ENV_REGRESSION') == 'source-runtime'\n" + CHILD
+    ))
+    run, outputs, _key = run_synthesis
+    run()
+    assert all(path.is_file() for path in outputs)
 
 
 @pytest.mark.parametrize("mode", ["stall", "malformed"])

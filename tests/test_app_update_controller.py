@@ -178,16 +178,18 @@ class AppUpdateControllerTests(unittest.TestCase):
         controller = AppUpdateController(host)
         payload = {
             "tag_name": "v99.0.0",
-            "html_url": "https://github.com/MachHongHai/HaizFlow/releases/tag/v99.0.0",
+            "html_url": "https://github.com/ManhPhan0812/titok_tool_app/releases/tag/v99.0.0",
             "body": "Release notes",
         }
         with patch(
             "haizflow.desktop.app_update_controller.urllib.request.urlopen",
             return_value=Response(json.dumps(payload).encode("utf-8")),
-        ):
+        ) as open_release:
             controller.check(manual=True)
             controller._thread.join(timeout=2)
             controller.drain_events()
+        self.assertEqual(open_release.call_args.args[0].full_url,
+                         "https://api.github.com/repos/ManhPhan0812/titok_tool_app/releases/latest")
         self.assertEqual(controller.state, "available")
         self.assertEqual(controller.latest_version, "99.0.0")
 
@@ -239,14 +241,15 @@ class AppUpdateControllerTests(unittest.TestCase):
         payload = {"tag_name": "v99.0.0", "assets": [dict(asset, name="HaizFlow-99.0.0-UNSIGNED-Setup.exe"), asset]}
         selected = installer_asset(payload, "99.0.0")
         self.assertEqual(selected["sha256"], asset["digest"][7:])
-        for overrides in ({"digest": None}, {"browser_download_url": "https://evil.invalid/setup.exe"}, {"size": -1}):
+        for overrides in ({"digest": None}, {"browser_download_url": "https://evil.invalid/setup.exe"}, {"size": -1},
+                          {"browser_download_url": "https://github.com/MachHongHai/HaizFlow/releases/download/v99.0.0/HaizFlow-99.0.0-Setup.exe"}):
             payload["assets"] = [dict(asset, **overrides)]
             self.assertEqual(installer_asset(payload, "99.0.0"), {})
 
     @staticmethod
     def asset(data):
         name = "HaizFlow-99.0.0-Setup.exe"
-        return {"name": name, "browser_download_url": f"https://github.com/MachHongHai/HaizFlow/releases/download/v99.0.0/{name}",
+        return {"name": name, "browser_download_url": f"https://github.com/ManhPhan0812/titok_tool_app/releases/download/v99.0.0/{name}",
                 "size": len(data), "digest": "sha256:" + hashlib.sha256(data).hexdigest()}
 
     def test_verified_download_opens_installer_on_qt_thread(self):

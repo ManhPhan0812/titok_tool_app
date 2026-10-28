@@ -16,7 +16,7 @@ def verify(root: Path = ROOT) -> None:
     release = str(manifest.get("release_version") or "")
     if not re.fullmatch(r"\d+\.\d+\.\d+", release) or filename != f"HaizFlow-{release}-ThirdPartySources.zip":
         raise ValueError("Unexpected source release identity.")
-    if manifest["url"] != f"https://github.com/MachHongHai/HaizFlow/releases/download/v{release}/" + filename:
+    if manifest["url"] != f"https://github.com/ManhPhan0812/titok_tool_app/releases/download/v{release}/" + filename:
         raise ValueError("Corresponding sources must use the binary release channel.")
     archive = root / "dist/release-sources" / filename
     with archive.open("rb") as stream:

@@ -73,6 +73,9 @@ class SmartWarmupController:
         """Warm the current draft, including projects without an imported video."""
         if str(getattr(self._host, "_project_type", "single")) in {"download", "publish"}:
             return
+        if (getattr(self._host, "_project_type", "single") == "single"
+                and getattr(self._host, "_automatic_output_mode", "subtitles_and_voice") == "original"):
+            return
         device = str(getattr(self._host, "_settings_processing_device", "cpu") or "cpu")
         model = str(getattr(self._host, "_speech_recognition_model", "small") or "small")
         # A single speculative load is enough, especially on 16 GB systems.
@@ -82,6 +85,11 @@ class SmartWarmupController:
         video = self._host._selected_video()
         if video is None:
             self.request_setup_prediction()
+            return
+        from haizflow.schemas.video import automatic_outputs
+
+        subtitles_enabled, dubbing_enabled = automatic_outputs(video)
+        if not subtitles_enabled and not dubbing_enabled:
             return
         context = {
             "device": str(getattr(self._host, "_settings_processing_device", "cpu") or "cpu"),
@@ -106,7 +114,8 @@ class SmartWarmupController:
             }
         ):
             predicted = "voice"
-        self.request(predicted, context, priority=10)
+        if predicted != "voice" or dubbing_enabled:
+            self.request(predicted, context, priority=10)
 
     def request(self, capability: str, context: dict | None = None, *, priority: int = 20) -> None:
         if self._stopping or self._suspended or not bool(getattr(self._host, "_keep_models_warm", True)):

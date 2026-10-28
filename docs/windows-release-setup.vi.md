@@ -235,7 +235,9 @@ Còn phải thử download qua GitHub release thật, gián đoạn/mạng yếu
 
 ## 8. Phát hành GitHub Releases
 
-Repo updater cố định: `MachHongHai/HaizFlow`. Repo khác cần sửa source và rebuild; không chỉ upload sang repo mới.
+Repo updater cố định: `ManhPhan0812/titok_tool_app`. Repo khác cần sửa source và rebuild; không chỉ upload sang repo mới.
+
+Bản fork này lấy cập nhật từ `ManhPhan0812/titok_tool_app`, không nhận Core hoặc bộ cài từ repository gốc. Phải build lại launcher/updater/Core và bộ cài sau khi đổi nguồn. EXE đã phát hành trước đó vẫn giữ địa chỉ cũ; người dùng cần cài bản build mới một lần để chuyển kênh cập nhật. Mỗi release mới phải tăng phiên bản và có Full Core ZIP cùng manifest đúng tên; Delta là tùy chọn. Các URL gói tài nguyên và nguồn thư viện đã ghim không tự chuyển theo kênh cập nhật ứng dụng.
 
 Chỉ sau khi tất cả gate và installer acceptance qua, bạn review/commit source, tag **đúng commit đã build**, push tag. Ghi rõ acceptance dùng fixture AppId riêng hay chính installer public trên VM; không gọi kiểm cục bộ là ma trận Windows đầy đủ. Không dùng `git add .` nếu có tệp secret hoặc thay đổi không thuộc release. Không retag/thay bytes của phiên bản đã phát hành.
 
@@ -251,7 +253,7 @@ Các lệnh dưới **tạo/publish release bên ngoài**, chỉ chạy khi bạ
 ```powershell
 gh auth login
 gh auth status
-gh release create v0.1.0 --repo MachHongHai/HaizFlow --verify-tag --draft `
+gh release create v0.1.0 --repo ManhPhan0812/titok_tool_app --verify-tag --draft `
   --title 'HaizFlow 0.1.0' --notes-file docs\release-notes-0.1.0.md `
   dist\installer\HaizFlow-0.1.0-Setup.exe `
   dist\installer\HaizFlow-0.1.0-Setup.exe.sha256 `
@@ -264,7 +266,7 @@ gh release create v0.1.0 --repo MachHongHai/HaizFlow --verify-tag --draft `
 Khi đã chốt stable:
 
 ```powershell
-gh release edit v0.1.0 --repo MachHongHai/HaizFlow --draft=false --latest
+gh release edit v0.1.0 --repo ManhPhan0812/titok_tool_app --draft=false --latest
 ```
 
 Updater hiện lấy stable Latest, bỏ draft/prerelease. Không đặt release engine `resources-v1` hoặc bản DEVELOPMENT/test làm Latest. Bản unsigned stable đã qua các gate có thể làm Latest theo lựa chọn của chủ dự án. Giữ release assets public tải được không cần token người dùng. Sau publish, test metadata/digest/download bằng tài khoản/máy mới; release sau test delta từ bản đang public, không từ baseline tự dựng.

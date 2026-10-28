@@ -13,8 +13,9 @@ from urllib.parse import urlparse
 from .filesystem import UpdateError, child, no_links, version
 from .manifest import Manifest
 
-API = "https://api.github.com/repos/MachHongHai/HaizFlow/releases/latest"
-REPOSITORY = "https://github.com/MachHongHai/HaizFlow"
+REPOSITORY_SLUG = "ManhPhan0812/titok_tool_app"
+API = f"https://api.github.com/repos/{REPOSITORY_SLUG}/releases/latest"
+REPOSITORY = f"https://github.com/{REPOSITORY_SLUG}"
 CDN_HOSTS = {"release-assets.githubusercontent.com", "objects.githubusercontent.com"}
 
 
@@ -24,7 +25,7 @@ def allowed_url(url: str, *, api: bool = False) -> None:
             or parsed.fragment or (api and url != API)):
         raise UpdateError("Nguồn tải cập nhật không được phép.")
     if not api and not (parsed.hostname in CDN_HOSTS or (
-            parsed.hostname == "github.com" and parsed.path.startswith("/MachHongHai/HaizFlow/releases/download/"))):
+            parsed.hostname == "github.com" and parsed.path.startswith(f"/{REPOSITORY_SLUG}/releases/download/"))):
         raise UpdateError("Nguồn tải cập nhật không được phép.")
 
 

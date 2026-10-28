@@ -94,9 +94,30 @@ def core_root() -> Path:
 
 
 def engine_environment() -> dict[str, str]:
-    """Give child engines the actual Core installation, not machine overrides."""
+    """Give child engines the parent's installation and resolved runtime paths."""
     environment = os.environ.copy()
-    if is_frozen() and not runtime_overrides_allowed():
+    if not is_frozen():
+        # Source checkouts can use installed, frozen resource engines too.
+        # They have no release launcher/installation marker, so opt only the
+        # child into the existing development path-override contract. Pin all
+        # paths explicitly: the engine's cwd and bundled .env are unrelated
+        # to this checkout, and must not select a separate runtime or models.
+        environment.update({
+            "HAIZFLOW_SMOKE_TEST": "1",
+            "HAIZFLOW_INSTALL_ROOT": str(install_root()),
+            "APP_DATA_DIR": str(app_data_dir()),
+            "HAIZFLOW_RESOURCE_ROOT": str(resource_storage_dir()),
+            "BIN_DIR": str(bin_dir()),
+        })
+        # The presence of these overrides also selects containment/cache
+        # policies. Preserve that choice while resolving relative values.
+        for name, directory in (("HAIZFLOW_HOME", app_data_dir),
+                                ("RUNTIME_DATA_DIR", runtime_data_dir),
+                                ("MODELS_DIR", models_dir)):
+            if environment.get(name):
+                environment[name] = str(directory())
+        environment.pop("HAIZFLOW_ENGINE_APP_ROOT", None)
+    elif not runtime_overrides_allowed():
         root = install_root()
         for name in ("HAIZFLOW_HOME", "APP_DATA_DIR", "RUNTIME_DATA_DIR", "MODELS_DIR",
                      "HAIZFLOW_INSTALL_ROOT", "HAIZFLOW_RESOURCE_ROOT", "HAIZFLOW_SMOKE_TEST"):

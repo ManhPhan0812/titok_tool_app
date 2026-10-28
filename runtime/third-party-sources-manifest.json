@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "release_version": "1.0.0",
-  "file": "HaizFlow-1.0.0-ThirdPartySources.zip",
-  "sha256": "54f0c42690dcde7f1353ea0b0ae0a9da04e511d74e04824e58a0102704adfe94",
-  "size": 831712752,
-  "url": "https://github.com/MachHongHai/HaizFlow/releases/download/v1.0.0/HaizFlow-1.0.0-ThirdPartySources.zip",
+  "release_version": "1.0.4",
+  "file": "HaizFlow-1.0.4-ThirdPartySources.zip",
+  "sha256": "d0a21b2231a2442185df6e2de856319da3ae6502ecd283a7de7839595fba9c56",
+  "size": 847739320,
+  "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.4/HaizFlow-1.0.4-ThirdPartySources.zip",
   "files": [
     {
       "file": "ffmpeg-cli/build-msys2.sh",
@@ -14,22 +14,22 @@
     {
       "file": "ffmpeg-cli/compiler-version.txt",
       "size": 253,
-      "sha256": "fafc2497a20b857a02f3c35fc7e2eb2afd4992737238c04da733c0c678398cd5"
+      "sha256": "32ed954af670855dc4143c73b7cb4eaeaea1a73a96c6b106d9aecbfc75a1cbea"
     },
     {
       "file": "ffmpeg-cli/config.h",
-      "size": 24170,
-      "sha256": "ade6d8a24ecaf617196ee158c5c049a791c3c92593626c62c6966c45d14b8656"
+      "size": 24194,
+      "sha256": "71a9b39a6fbb92bb94888e9d9147a68b7dc3e842ebf32360611e57fdb2728d9f"
     },
     {
       "file": "ffmpeg-cli/config.log",
-      "size": 821308,
-      "sha256": "19c92864ddf4b13501d0936417b805ab97b4c9f89d43b5f777f1c5ec90944684"
+      "size": 717523,
+      "sha256": "b9615a62fcb229a8a0a0a8f64602795c28c6127b9524e7c9e967ea187952aa96"
     },
     {
       "file": "ffmpeg-cli/config.mak",
-      "size": 89432,
-      "sha256": "062a132abea5085ea60d4d6600acb97f5dd7a1f5140ccea1c6734704ccefe2d5"
+      "size": 88611,
+      "sha256": "1c91db12ee33359ad8b515b383a7dacf4ae6c7b7f6593ad3c9381b136cdd0aab"
     },
     {
       "file": "ffmpeg-cli/ffmpeg-8.1.2.tar.xz",
@@ -42,9 +42,9 @@
       "sha256": "0a0963fccd70597838073f3e31b20f4a4d8cc2b5e577472c9a5a1f22624246f8"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-brotli-1.2.0-1.src.tar.zst",
-      "size": 644113,
-      "sha256": "2f0f93875aac21990d20f1eaf0ad8b970eb6f186c663c77ae47aaaf9e5711fcf"
+      "file": "ffmpeg-cli/mingw-w64-brotli-1.2.1-1.src.tar.zst",
+      "size": 645162,
+      "sha256": "3dfc69b88a111ef4809928e81d4cb650ea9c7ba5da4ebd1bf28d6effdeeb6bd6"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-bzip2-1.0.8-4.src.tar.zst",
@@ -52,9 +52,9 @@
       "sha256": "fd9360917314d1cbccb3cb15ed8450d1e56b8a9f733b606504aba52c52159e54"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-crt-14.0.0.r426.g4564ee4b5-1.src.tar.zst",
-      "size": 54805035,
-      "sha256": "8edb0c86c4fe776e6bda609149ef1b3bbbad772711796bd051c0d57318589d5c"
+      "file": "ffmpeg-cli/mingw-w64-crt-14.0.0.r569.g34eeafb7d-1.src.tar.zst",
+      "size": 59745832,
+      "sha256": "c573674268a283806703868cf210a2d063000ec129e8d391fe043ce89c53c77e"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-dav1d-1.5.4-1.src.tar.zst",
@@ -62,9 +62,9 @@
       "sha256": "dd7bdbd140996eb26e857c2cfe80d0952641c997a5826c15d5bb204571d2518e"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-expat-2.8.5-1.src.tar.zst",
-      "size": 530963,
-      "sha256": "40a9ee9744ab828e205c409979f1bde553e8a6c20bd3d956a235d0e925ffaaba"
+      "file": "ffmpeg-cli/mingw-w64-expat-2.9.0-1.src.tar.zst",
+      "size": 536681,
+      "sha256": "014a4b1949f65f053a9774712994db89fea290516f1c1849bbbbf7316ee1606b"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-ffnvcodec-headers-13.0.19.0-1.src.tar.zst",
@@ -72,9 +72,9 @@
       "sha256": "bbfe8b4bab915e862b6ea6f8a5a43e9d6a95348fc5a4efc71ffece5b349673ee"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-fftw-3.3.11-1.src.tar.zst",
-      "size": 4229778,
-      "sha256": "3d3f5489e62f1045aff687389500ffb65744c7e76970af879eccde1f887b3b58"
+      "file": "ffmpeg-cli/mingw-w64-fftw-3.3.11-2.src.tar.zst",
+      "size": 4229807,
+      "sha256": "a2ff0d734d5a699e8d1beb5c1cd2740197dd254c5666704177cfb9b48017dfc4"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-fontconfig-2.18.3-1.src.tar.zst",
@@ -82,9 +82,9 @@
       "sha256": "7df65dbf84397f4f71c6aa0bd39fac93f839d6b87f04a935773b69828740230d"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-freetype-2.14.3-1.src.tar.zst",
-      "size": 2673693,
-      "sha256": "ee8071d0a6e82a274e959902898115f4c9c376a2a8e209d83dfe746c18004ec0"
+      "file": "ffmpeg-cli/mingw-w64-freetype-2.15.0-1.src.tar.zst",
+      "size": 2720468,
+      "sha256": "2f09c60b72bd249642d055aa5a34edf2577392e592415f3f4730dd37990b47ad"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-fribidi-1.0.17-1.src.tar.zst",
@@ -92,9 +92,9 @@
       "sha256": "0f192cf5009fe18e2ac752273de509094cf161106fbedd69f112186e75253850"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-gcc-16.2.0-4.src.tar.zst",
-      "size": 107228968,
-      "sha256": "a1792a44764405bc365746e0e60f0daa122076cec0dddd35a781d141f94273cf"
+      "file": "ffmpeg-cli/mingw-w64-gcc-16.2.0-6.src.tar.zst",
+      "size": 107229138,
+      "sha256": "a901d8afb78438abcff9ed020cd9aa9431db76de1992171c2454c3c07ad289e8"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-gettext-1.0-1.src.tar.zst",
@@ -102,9 +102,9 @@
       "sha256": "cca0d0c8f60353faccc5ad40405240014e4a7ccc8b1c6ca9f4626aef3097d26e"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-glib2-2.90.0-1.src.tar.zst",
-      "size": 5835342,
-      "sha256": "580246fb9db6083e0191ac7fd0e44af71df6ec0dc52cfd384b5ae07f8665cc9e"
+      "file": "ffmpeg-cli/mingw-w64-glib2-2.90.1-1.src.tar.zst",
+      "size": 5875958,
+      "sha256": "ac3bc00e4079e6b51dd0a1fb9ccc420fff033b4e9095e4487dbf6cf01312cee6"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-graphite2-1.3.15-1.src.tar.zst",
@@ -112,19 +112,19 @@
       "sha256": "eb76ce274c68ea6bad0883144c21e44a803ec94fed9dc0f6584feb0a8415a1d6"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-harfbuzz-14.5.1-1.src.tar.zst",
-      "size": 20263310,
-      "sha256": "6431a87273cb2c53f9ab43ea811b05de42192dbc8a00de13abad5f227a89ed2e"
+      "file": "ffmpeg-cli/mingw-w64-harfbuzz-15.0.0-1.src.tar.zst",
+      "size": 20400279,
+      "sha256": "1a91dff137a53f09667c183ddde293820de017c8bee93c11782e7114b13c5feb"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-headers-14.0.0.r426.g4564ee4b5-1.src.tar.zst",
-      "size": 54807433,
-      "sha256": "205f4aaf65442c4ae5cd199f519c353f472a5ca1786adf351d48f318c6c6b1e5"
+      "file": "ffmpeg-cli/mingw-w64-headers-14.0.0.r569.g34eeafb7d-1.src.tar.zst",
+      "size": 59729564,
+      "sha256": "9925bbd0f5af168ecae98e7b9ce1944c338db22619443a9ca009f0a92cd637a4"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-lame-3.100-3.src.tar.zst",
-      "size": 1526904,
-      "sha256": "dfd51143ea25aa0b67f5d355127b8a89a27379b1b128f0b2f9eed7c3327656ab"
+      "file": "ffmpeg-cli/mingw-w64-lame-4.0-1.src.tar.zst",
+      "size": 1498280,
+      "sha256": "d6b09455f8a6803bbf8b1e6b9c43bc64e0d9b46b6bdfe6903e40450d6e61818a"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-libass-0.17.5-1.src.tar.zst",
@@ -137,9 +137,9 @@
       "sha256": "74428280c17094da5b702c29b2e1a0abae59556ea5dfdd65705cc8ccc1e000fb"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-libpng-1.6.59-1.src.tar.zst",
-      "size": 1611403,
-      "sha256": "2b836f8565a3889ed9bb86f9724074ae274f109e2bcd882dd1f080ea4da8a41a"
+      "file": "ffmpeg-cli/mingw-w64-libpng-1.6.59-2.src.tar.zst",
+      "size": 1611367,
+      "sha256": "7f7c029d119427fe7b36be8a79228f831062bedadee1f49c9e0919fe6d7a459a"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-libsamplerate-0.2.2-1.src.tar.zst",
@@ -152,19 +152,24 @@
       "sha256": "3d51ed18b20deb475c6947ea8fdabb7d6107962e2e6e690de90e5227537728ad"
     },
     {
+      "file": "ffmpeg-cli/mingw-w64-mpg123-1.33.7-1.src.tar.zst",
+      "size": 1126100,
+      "sha256": "f924cfca2e6cb867e4efc2aa3935bac24593da1631bf1a8613bc35b4fae88c18"
+    },
+    {
       "file": "ffmpeg-cli/mingw-w64-pcre2-10.49-1.src.tar.zst",
       "size": 2183818,
       "sha256": "b02f0d5070b7d7f6db5c8ba9b009f28c1a07b9b52aaf7964dc0c8b098e4088d1"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-rubberband-3.3.0-1.src.tar.zst",
-      "size": 225223,
-      "sha256": "0d82946254533c85875e03dbde8d0303bbc4d1afcef8de79c9fdd1fff7324e82"
+      "file": "ffmpeg-cli/mingw-w64-rubberband-3.3.0-2.src.tar.zst",
+      "size": 225222,
+      "sha256": "1b6e660a0441747f4dccb19cf31bb266339d84165e0886de6393e6e9533ca9e9"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-winpthreads-14.0.0.r426.g4564ee4b5-1.src.tar.zst",
-      "size": 54807189,
-      "sha256": "5493832de1b7e24f09edb556ed409091b0844f9677212c4865618d6f93c508be"
+      "file": "ffmpeg-cli/mingw-w64-winpthreads-14.0.0.r569.g34eeafb7d-1.src.tar.zst",
+      "size": 59742929,
+      "sha256": "8f43ac029183d5afea64dfbb4692729bd7fd8c087de550d32deab1d061fe2a36"
     },
     {
       "file": "ffmpeg-cli/mingw-w64-x264-0.165.r3222.b35605a-3.src.tar.zst",
@@ -177,14 +182,14 @@
       "sha256": "b8acbc56b2bfe08df7bffff423f3bf07ee85dbec4e07416017ab04c8afb9d13e"
     },
     {
-      "file": "ffmpeg-cli/mingw-w64-zlib-1.3.2-2.src.tar.zst",
-      "size": 1326375,
-      "sha256": "eef69dea52357e01b272d6fd6dc4d7c0773f71260cb7bcde6047c8c383518db3"
+      "file": "ffmpeg-cli/mingw-w64-zlib-1.3.2-3.src.tar.zst",
+      "size": 1326411,
+      "sha256": "4b7839ab2826d3e3d27fe46150d2180a1f561f4d03c9e82aeb4b056180561f00"
     },
     {
       "file": "ffmpeg-cli/toolchain-packages.txt",
-      "size": 3848,
-      "sha256": "8d0930c3637381232306514d6fdb57515419bfc4a1936312b66ae55b8ea2344b"
+      "size": 6539,
+      "sha256": "4eca7d3a6f80b87c2e669c0267f62feed5b180e425ea40f3a0fdc50f4132107e"
     },
     {
       "file": "ffmpeg-engine/build-engine-msys2.sh",
@@ -1743,8 +1748,8 @@
     },
     {
       "file": "licenses/EDGE-TTS-NOTICE.md",
-      "size": 1258,
-      "sha256": "028b5d72be4802c755105bd005309e1f6ef9e37195a5dd760e1ada0d3fa5cf7a"
+      "size": 1337,
+      "sha256": "1f2027067c8c591cb60bd3b225c7ca67be96f0234bfa657b93c531da42f0562b"
     },
     {
       "file": "licenses/FFmpeg-NOTICE.md",
@@ -2085,11 +2090,6 @@
       "file": "licenses/qt/pyside-setup-everywhere-src-6.11.1/examples/webenginewidgets/markdowneditor/resources/3rdparty/qt_attribution.json",
       "size": 1626,
       "sha256": "be9cc206afd6d7f1a77daa7bb169a8f4734158789ccc5eeaf4fe276bff81cfa4"
-    },
-    {
-      "file": "licenses/qt/pyside-setup-everywhere-src-6.11.1/examples/webenginewidgets/simplebrowser/data/3rdparty/qt_attribution.json",
-      "size": 911,
-      "sha256": "e99ffa34182e6e1f4deb0dbcd261201acc1dfb507b5bbb649a8c5f1580523e65"
     },
     {
       "file": "licenses/qt/pyside-setup-everywhere-src-6.11.1/LICENSES/Apache-2.0.txt",
@@ -3443,8 +3443,8 @@
     },
     {
       "file": "runtime/ffmpeg-manifest.json",
-      "size": 5622,
-      "sha256": "fee429e1596db735499198c796af8c730d9bd04bf1637840041d3a9570ec8ce0"
+      "size": 5957,
+      "sha256": "fb91ccb2dc60ae72ae4afa2e2aad74f068a433b5aa18840fdac24765aaed3e07"
     },
     {
       "file": "runtime/engine-ffmpeg-manifest.json",
@@ -3463,8 +3463,8 @@
     },
     {
       "file": "ffmpeg-release-inputs/closure.json",
-      "size": 46962,
-      "sha256": "d19ead63bccbc38a8003251ac55f5e0ce27743a18bcbea2152de299df4b2e8cb"
+      "size": 48667,
+      "sha256": "1d0c2f127584e22a1772029c00700e2466b6c8070522593fdd64244b09bbcf9c"
     },
     {
       "file": "engine-ffmpeg-release-inputs/closure.json",

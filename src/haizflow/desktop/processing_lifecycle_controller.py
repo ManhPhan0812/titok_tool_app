@@ -19,11 +19,15 @@ class ProcessingLifecycleController:
 
     def enqueue_video(self, video_id: str) -> bool:
         host = self._host
-        if getattr(host, "_model_setup_state", "ready") != "ready":
+        video = video_store.get_video(video_id)
+        from haizflow.schemas.video import automatic_outputs
+
+        needs_models = (any(automatic_outputs(video))
+                        or bool(getattr(video, "remove_original_subtitles", False)))
+        if needs_models and getattr(host, "_model_setup_state", "ready") != "ready":
             host._status_message = "Finish model setup before starting a video."
             host.statusMessageChanged.emit()
             return False
-        video = video_store.get_video(video_id)
         if not video or video.status == "processing" or host._processing_queue.contains(video_id):
             return False
         from haizflow.services.processing_resume import can_resume, configuration_snapshot
@@ -36,7 +40,7 @@ class ProcessingLifecycleController:
             if getattr(video, "project_type", "single") == "manual"
             else ""
         )
-        needs_translation = not manual_tool or manual_tool == "translation"
+        needs_translation = (not manual_tool and any(automatic_outputs(video))) or manual_tool == "translation"
         if needs_translation and str(getattr(video, "translation_model", "")).startswith("gemini-"):
             from haizflow.services.gemini_translation import key_configured
 
@@ -162,6 +166,11 @@ class ProcessingLifecycleController:
             requires_model_runtime = not manual_tool or manual_tool in {
                 "separation", "recognition", "translation", "image", "voice"
             }
+            if not manual_tool:
+                from haizflow.schemas.video import automatic_outputs
+
+                requires_model_runtime = (any(automatic_outputs(video))
+                                          or bool(getattr(video, "remove_original_subtitles", False)))
             if requires_model_runtime and not host._initial_model_warmup_done.is_set():
                 video_store.log_to_video(video_id, "Waiting for startup model warm-up to finish.")
                 video_store.update_video(
@@ -248,7 +257,7 @@ class ProcessingLifecycleController:
                     "Đang khởi tạo công cụ"
                     if manual_tool
                     else "Model warm-up complete; starting tool"
-                    if requires_model_runtime else "Starting Manual tool"
+                    if requires_model_runtime else "Starting video processing"
                 ),
             )
 
@@ -290,6 +299,10 @@ class ProcessingLifecycleController:
 
         video = video_store.get_video(video_id)
         if video is None:
+            return
+        from haizflow.schemas.video import automatic_outputs
+
+        if not any(automatic_outputs(video)):
             return
         context = {
             "device": str(getattr(self._host, "_settings_processing_device", "cpu") or "cpu"),

@@ -146,7 +146,7 @@ minh executable tuân thủ cam kết schema: tác giả release phải kiểm c
 
 ## GitHub và giới hạn không ký
 
-Nguồn duy nhất là public releases/latest của MachHongHai/HaizFlow. Không PAT,
+Nguồn duy nhất là public releases/latest của ManhPhan0812/titok_tool_app. Không PAT,
 đăng nhập, API key, Authenticode hay Ed25519. Release phải stable/published/tag
 hợp lệ và đúng URL repo. Tải đúng tên asset, uploaded, size và API sha256 digest;
 digest package phải đồng nhất manifest. Redirect kiểm tra trước connection:

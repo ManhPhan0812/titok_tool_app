@@ -470,9 +470,11 @@ class Response(BytesIO):
 
 class DownloadTests(unittest.TestCase):
     def test_official_public_release_requires_stable_tag_repo(self):
-        payload = {"tag_name": "v0.2.0", "html_url": "https://github.com/MachHongHai/HaizFlow/releases/tag/v0.2.0",
+        payload = {"tag_name": "v0.2.0", "html_url": "https://github.com/ManhPhan0812/titok_tool_app/releases/tag/v0.2.0",
                    "draft": False, "prerelease": False, "assets": []}
-        for changes in ({}, {"draft": True}, {"tag_name": "v0.2.0-rc1"}, {"html_url": "https://github.com/other/repo/releases/tag/v0.2.0"}):
+        for changes in ({}, {"draft": True}, {"tag_name": "v0.2.0-rc1"},
+                        {"html_url": "https://github.com/other/repo/releases/tag/v0.2.0"},
+                        {"html_url": "https://github.com/MachHongHai/HaizFlow/releases/tag/v0.2.0"}):
             client = GitHubClient(opener=lambda *_args, **_kwargs: Response(json.dumps(dict(payload, **changes)).encode(), API))
             if changes:
                 with self.assertRaises(UpdateError):
@@ -482,16 +484,28 @@ class DownloadTests(unittest.TestCase):
 
     def test_redirect_policy_rejects_before_contacting_untrusted_host(self):
         for url in ("http://github.com/file", "https://evil.invalid/file", "https://github.com/other/repo/releases/download/v1/file",
-                    "https://github.com@evil.invalid/file"):
+                    "https://github.com@evil.invalid/file",
+                    "https://github.com/MachHongHai/HaizFlow/releases/download/v0.2.0/file.zip",
+                    "https://github.com/ManhPhan0812/titok_tool_app-other/releases/download/v0.2.0/file.zip"):
             with self.subTest(url=url), self.assertRaises(UpdateError):
                 allowed_url(url)
-        request = __import__("urllib.request", fromlist=["Request"]).Request("https://github.com/MachHongHai/HaizFlow/releases/download/v0.2.0/file.zip")
+        request = __import__("urllib.request", fromlist=["Request"]).Request("https://github.com/ManhPhan0812/titok_tool_app/releases/download/v0.2.0/file.zip")
         with self.assertRaises(UpdateError):
             RedirectPolicy().redirect_request(request, None, 302, "Found", {}, "https://evil.invalid/a")
+        with self.assertRaises(UpdateError):
+            RedirectPolicy().redirect_request(request, None, 302, "Found", {},
+                "https://github.com/MachHongHai/HaizFlow/releases/download/v0.2.0/file.zip")
+
+    def test_fork_release_and_api_urls_are_allowed(self):
+        self.assertEqual(API, "https://api.github.com/repos/ManhPhan0812/titok_tool_app/releases/latest")
+        allowed_url(API, api=True)
+        allowed_url("https://github.com/ManhPhan0812/titok_tool_app/releases/download/v0.2.0/file.zip")
+        with self.assertRaises(UpdateError):
+            allowed_url("https://api.github.com/repos/MachHongHai/HaizFlow/releases/latest", api=True)
 
     def test_partial_and_wrong_digest_downloads_never_publish(self):
         data = b"package"
-        asset = {"name": "file.zip", "url": "https://github.com/MachHongHai/HaizFlow/releases/download/v0.2.0/file.zip",
+        asset = {"name": "file.zip", "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v0.2.0/file.zip",
                  "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}
         with tempfile.TemporaryDirectory() as directory:
             for body in (b"half", b"wrong!!"):
@@ -508,9 +522,13 @@ class DownloadTests(unittest.TestCase):
     def test_asset_missing_digest_or_wrong_repo_is_rejected(self):
         name = "HaizFlow-Core-0.2.0-windows-x64-full.zip"
         asset = {"name": name, "size": 1, "state": "uploaded", "digest": "sha256:" + "1" * 64,
-                 "browser_download_url": "https://github.com/MachHongHai/HaizFlow/releases/download/v0.2.0/" + name}
+                 "browser_download_url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v0.2.0/" + name}
         client = GitHubClient()
-        for changes in ({"digest": None}, {"size": -1}, {"state": "new"}, {"browser_download_url": "https://evil.invalid/file"}):
+        release = {"tag_name": "v0.2.0", "assets": [asset]}
+        self.assertEqual(client.asset(release, name)["url"], asset["browser_download_url"])
+        for changes in ({"digest": None}, {"size": -1}, {"state": "new"},
+                        {"browser_download_url": "https://evil.invalid/file"},
+                        {"browser_download_url": "https://github.com/MachHongHai/HaizFlow/releases/download/v0.2.0/" + name}):
             with self.assertRaises(UpdateError):
                 client.asset({"tag_name": "v0.2.0", "assets": [dict(asset, **changes)]}, name)
 

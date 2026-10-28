@@ -259,6 +259,7 @@ def create_video(video_id: str, original_filename: str, config: VideoConfig, vid
         output_speed=config.output_speed,
         crop=config.crop,
         enable_audio_separation=config.enable_audio_separation,
+        automatic_output_mode=config.automatic_output_mode,
         original_video_volume=config.original_video_volume,
         background_music_volume=config.background_music_volume,
         background_music_loop=config.background_music_loop,

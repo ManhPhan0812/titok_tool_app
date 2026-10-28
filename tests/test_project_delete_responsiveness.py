@@ -113,6 +113,33 @@ def test_windows_preview_handle_retry_runs_outside_ui_slot(tmp_path):
     assert commands._deletion_events.get_nowait()[0] == "detached"
 
 
+def test_deletion_detaches_native_sources_before_preview_release_and_worker_start():
+    owner = host()
+    owner._selected_project_key = "project"
+    owner._selected_video_id = "video"
+    events = []
+    owner.sourceReplacementRequested = SimpleNamespace(emit=lambda video_id: events.append(("detach", video_id)))
+    owner.releaseEditorPreview = lambda: events.append("release")
+    owner._audio_preview = SimpleNamespace(invalidate=lambda: events.append("audio"))
+    commands = ProjectCommandsController(owner)
+    with patch.object(commands, "_queue_project_delete", side_effect=lambda *_: events.append("worker") or True):
+        assert commands._delete_confirmed_project({"key": "project"}, [SimpleNamespace(video_id="video")])
+    assert events == [("detach", "video"), "release", "audio", "worker"]
+
+
+def test_deleting_another_project_preserves_selected_preview_and_audio():
+    owner = host()
+    owner._selected_video_id = "selected-video"
+    owner.sourceReplacementRequested = SimpleNamespace(emit=Mock())
+    owner.releaseEditorPreview = Mock()
+    owner._audio_preview = SimpleNamespace(invalidate=Mock())
+    commands = ProjectCommandsController(owner)
+    commands._release_project_preview("delete-me", [SimpleNamespace(video_id="other-video")])
+    owner.sourceReplacementRequested.emit.assert_called_once_with("other-video")
+    owner.releaseEditorPreview.assert_not_called()
+    owner._audio_preview.invalidate.assert_not_called()
+
+
 def test_failed_preflight_restores_deletion_guards_and_keeps_other_project_selected():
     owner = host()
     commands = ProjectCommandsController(owner)

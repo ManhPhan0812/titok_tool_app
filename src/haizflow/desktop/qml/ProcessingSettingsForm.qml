@@ -41,6 +41,14 @@ GridLayout {
     property bool removeOriginalSubtitles: true
     property string subtitleRemovalMode: "patch"
     property bool enableAudioSeparation: true
+    property bool showAutomaticOutputMode: false
+    property string automaticOutputMode: "subtitles_and_voice"
+    readonly property bool subtitlesEnabled: !showAutomaticOutputMode
+        || automaticOutputMode === "subtitles_and_voice" || automaticOutputMode === "subtitles_only"
+    readonly property bool dubbingEnabled: !showAutomaticOutputMode
+        || automaticOutputMode === "subtitles_and_voice" || automaticOutputMode === "voice_only"
+    readonly property bool textProcessingEnabled: subtitlesEnabled || dubbingEnabled
+    signal automaticOutputModeEdited(string value)
     property string backgroundMusicPath: ""
     property bool backgroundMusicLoop: true
     property bool audioDuckingEnabled: false
@@ -102,6 +110,29 @@ GridLayout {
 
             Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Theme.divider }
 
+            SettingLabel {
+                Layout.fillWidth: true
+                visible: root.showAutomaticOutputMode
+                text: qsTr("Nội dung xuất")
+                helpText: qsTr("Chọn phụ đề dịch và lồng tiếng. Khi tắt lồng tiếng, âm thanh gốc được giữ theo mức âm lượng đã chọn. Phụ đề có sẵn trong video được xử lý riêng ở mục Phụ đề gốc.")
+            }
+            StudioComboBox {
+                objectName: "automaticOutputModeCombo"
+                Layout.fillWidth: true
+                visible: root.showAutomaticOutputMode
+                enabled: root.editable
+                textRole: "label"
+                valueRole: "value"
+                model: [
+                    { "label": qsTr("Phụ đề + lồng tiếng"), "value": "subtitles_and_voice" },
+                    { "label": qsTr("Chỉ phụ đề"), "value": "subtitles_only" },
+                    { "label": qsTr("Chỉ lồng tiếng"), "value": "voice_only" },
+                    { "label": qsTr("Không phụ đề, không lồng tiếng"), "value": "original" }
+                ]
+                currentIndex: Math.max(0, ["subtitles_and_voice", "subtitles_only", "voice_only", "original"].indexOf(root.automaticOutputMode))
+                onActivated: root.automaticOutputModeEdited(currentValue)
+            }
+
             Text {
                 Layout.fillWidth: true
                 text: AppController.processingDevice === "gpu"
@@ -120,7 +151,7 @@ GridLayout {
             }
             StudioComboBox {
                 Layout.fillWidth: true
-                enabled: root.editable
+                enabled: root.editable && root.textProcessingEnabled
                 textRole: "label"
                 valueRole: "value"
                 model: root.speechRecognitionOptions
@@ -135,13 +166,13 @@ GridLayout {
             }
             TranslationModelCombo {
                 Layout.fillWidth: true
-                enabled: root.editable && !AppController.isSwitchingProcessingDevice
+                enabled: root.editable && root.textProcessingEnabled && !AppController.isSwitchingProcessingDevice
                 selectedModel: root.translationModel
                 onEdited: function(value) { root.translationModelEdited(value) }
             }
             GeminiGuidanceButton {
                 Layout.fillWidth: true
-                visible: root.translationModel.indexOf("gemini-") === 0
+                visible: root.textProcessingEnabled && root.translationModel.indexOf("gemini-") === 0
                 enabled: root.editable
                 instructions: root.geminiInstructions
                 glossary: root.geminiGlossary
@@ -157,7 +188,7 @@ GridLayout {
             SearchableLanguageCombo {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
-                enabled: root.editable
+                enabled: root.editable && root.textProcessingEnabled
                 options: root.targetLanguageOptions
                 selectedCode: root.targetLanguage
                 onSelected: function(code) { root.targetLanguageEdited(code) }
@@ -169,7 +200,7 @@ GridLayout {
             }
             StudioComboBox {
                 Layout.fillWidth: true
-                enabled: root.editable
+                enabled: root.editable && root.dubbingEnabled
                 model: root.ttsProviderOptions
                 textRole: "label"
                 valueRole: "provider"
@@ -186,7 +217,7 @@ GridLayout {
             }
             Text {
                 Layout.fillWidth: true
-                visible: root.ttsProvider === "edge"
+                visible: root.dubbingEnabled && root.ttsProvider === "edge"
                 text: qsTr("Cần Internet. Nội dung phụ đề được gửi tới Microsoft để tạo giọng.")
                 color: Theme.textMuted
                 font.pixelSize: TypeScale.metadata
@@ -194,7 +225,7 @@ GridLayout {
             }
             VoicePicker {
                 Layout.fillWidth: true
-                enabled: root.editable
+                enabled: root.editable && root.dubbingEnabled
                 model: root.ttsVoiceOptions
                 currentValue: root.speakerMode === "multiple" ? "omnivoice:multiple" : root.ttsVoice
                 allowMultipleSpeakers: root.ttsProvider.indexOf("omnivoice") === 0 || root.ttsProvider.indexOf("vieneu") === 0
@@ -262,7 +293,7 @@ GridLayout {
                 }
                 StudioButton {
                     text: qsTr("Chỉnh phụ đề")
-                    enabled: root.editable && root.hasSource
+                    enabled: root.editable && root.hasSource && root.subtitlesEnabled
                     onClicked: root.subtitleLayoutRequested()
                 }
             }
@@ -311,8 +342,8 @@ GridLayout {
                 SegmentedControl {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 38
-                    enabled: root.editable
-                    currentValue: root.enableAudioSeparation ? "separated" : "original"
+                    enabled: root.editable && root.dubbingEnabled
+                    currentValue: root.dubbingEnabled && root.enableAudioSeparation ? "separated" : "original"
                     options: [
                         { "label": qsTr("Giữ âm thanh gốc"), "value": "original" },
                         { "label": qsTr("Tách giọng"), "value": "separated" }

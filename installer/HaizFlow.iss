@@ -40,8 +40,8 @@
 #endif
 
 #define AppName "HaizFlow"
-#define AppPublisher "Mach Hong Hai"
-#define AppUrl "https://github.com/MachHongHai/HaizFlow"
+#define AppPublisher "ManhPhan0812 (HaizFlow fork)"
+#define AppUrl "https://github.com/ManhPhan0812/titok_tool_app"
 #ifndef VersionedLayout
   #define VersionedLayout "0"
 #endif

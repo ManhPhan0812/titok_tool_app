@@ -123,8 +123,8 @@ Popup {
             }
             ExternalTextLink {
                 objectName: "appUpdateDetailsLink"
-                text: "haizflow.pages.dev"
-                destination: "https://haizflow.pages.dev/"
+                text: "ManhPhan0812/titok_tool_app"
+                destination: "https://github.com/ManhPhan0812/titok_tool_app/releases"
             }
         }
         ColumnLayout {

@@ -40,22 +40,32 @@ def verify_assets(root: Path, device: str = "") -> Path:
 
 def prepare_runtime(root: Path) -> Path:
     """Extract versioned wheels atomically, without changing other backends."""
+    from haizflow.core.file_lock import interprocess_file_lock
     from haizflow.core.model_integrity import _verify
 
+    root = root.expanduser().resolve()
     wheels = {item["path"]: (item["size"], item["sha256"])
               for item in MANIFEST["assets"] if item["path"].startswith("sdk/")}
-    _verify(root, kind="VieNeu SDK", revision=CACHE_VERSION, expected=wheels,
-            marker_name=".haizflow-vieneu-sdk-v383-integrity.json")
     destination = root / "sdk" / ("runtime-" + MANIFEST["sdk_version"])
-    with _PREPARE_LOCK:
+    # Keep the lock outside sdk: recovery may replace that complete directory.
+    lock = root / (".vieneu-sdk-" + MANIFEST["sdk_version"] + ".prepare.lock")
+    with _PREPARE_LOCK, interprocess_file_lock(lock, timeout_seconds=60):
+        _verify(root, kind="VieNeu SDK", revision=CACHE_VERSION, expected=wheels,
+                marker_name=".haizflow-vieneu-sdk-v383-integrity.json")
         marker = destination / ".ready"
         required = ("vieneu/__init__.py", "vieneu/v3turbo.py", "vieneu/assets/voices_v3_turbo.json",
                     "sea_g2p/__init__.py", "sea_g2p/sea_g2p_rs.pyd", "kaldi_native_fbank/__init__.py",
                     "_kaldi_native_fbank.cp313-win_amd64.pyd", "kaldi-native-fbank-core.dll")
-        if (marker.is_file() and marker.read_text(encoding="ascii") == CACHE_VERSION
-                and all((destination / name).is_file() for name in required)):
+        try:
+            ready = (marker.is_file() and marker.read_text(encoding="ascii") == CACHE_VERSION
+                     and all((destination / name).is_file() for name in required))
+        except (OSError, UnicodeError):
+            # A stale/locked marker is not proof of a usable SDK. Rebuild only
+            # the extracted cache from the checksum-verified wheels below.
+            ready = False
+        if ready:
             return destination
-        with tempfile.TemporaryDirectory(prefix="vieneu-sdk-", dir=root / "sdk") as work:
+        with tempfile.TemporaryDirectory(prefix="vieneu-sdk-", dir=root) as work:
             staging = Path(work) / "site-packages"
             staging.mkdir()
             for filename in wheels:
@@ -72,12 +82,42 @@ def prepare_runtime(root: Path) -> Path:
             (staging / ".ready").write_text(CACHE_VERSION, encoding="ascii")
             if not all((staging / name).is_file() for name in required):
                 raise RuntimeError("Gói SDK VieNeu chưa đầy đủ.")
+            backup = None
             if destination.exists():
                 # A damaged unpacked runtime is not a valid installed SDK.
                 # Keep its recoverable copy inside this specific SDK directory.
                 backup = destination.with_name(destination.name + f"-old-{time.time_ns()}")
-                os.replace(destination, backup)
-            os.replace(staging, destination)
+                try:
+                    os.replace(destination, backup)
+                except PermissionError:
+                    # Windows can deny access to the extracted directory while
+                    # its parent and the original wheels remain usable. Build a
+                    # complete replacement SDK beside it; preserve the original
+                    # directory without changing ACLs or touching model weights.
+                    replacement = Path(work) / "sdk"
+                    replacement.mkdir()
+                    for filename in wheels:
+                        target = replacement / Path(filename).relative_to("sdk")
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(root / filename, target)
+                    _verify(Path(work), kind="VieNeu SDK", revision=CACHE_VERSION, expected=wheels,
+                            marker_name=".haizflow-vieneu-sdk-v383-integrity.json")
+                    os.replace(staging, replacement / destination.name)
+                    sdk = root / "sdk"
+                    sdk_backup = sdk.with_name(f"sdk-old-{time.time_ns()}")
+                    os.replace(sdk, sdk_backup)
+                    try:
+                        os.replace(replacement, sdk)
+                    except OSError:
+                        os.replace(sdk_backup, sdk)
+                        raise
+                    return destination
+            try:
+                os.replace(staging, destination)
+            except OSError:
+                if backup is not None and not destination.exists():
+                    os.replace(backup, destination)
+                raise
     return destination
 
 
@@ -161,7 +201,9 @@ def synthesize_batch_to_mp3(items, video_id, *, device="cpu", language_id="vi",
         request = dict(root=str(root), site=str(site), device=device, items=entries, status=str(status_path))
         request_path = work / "request.json"
         request_path.write_text(json.dumps(request, ensure_ascii=False), encoding="utf-8")
-        environment = os.environ.copy()
+        from haizflow.core.paths import engine_environment
+
+        environment = engine_environment()
         environment.update(HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", PYTHONUTF8="1",
                            PYTHONUNBUFFERED="1", TOKENIZERS_PARALLELISM="false")
         source_root = str(Path(__file__).resolve().parents[2])

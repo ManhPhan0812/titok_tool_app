@@ -48,7 +48,7 @@ Item {
             compare(message.textFormat, Text.PlainText);
             const details = findChild(popup, "appUpdateDetailsLink");
             verify(details !== null);
-            compare(details.destination.toString(), "https://haizflow.pages.dev/");
+            compare(details.destination.toString(), "https://github.com/ManhPhan0812/titok_tool_app/releases");
             verify(details.visible);
             popup.controller.appUpdateState = "checking";
             verify(details.visible);

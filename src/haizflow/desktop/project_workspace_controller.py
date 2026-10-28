@@ -117,6 +117,7 @@ class ProjectWorkspaceController:
                 "Updated incompatible saved TTS settings for the target language.",
             )
         host._enable_audio_separation = video.enable_audio_separation
+        host._automatic_output_mode = getattr(video, "automatic_output_mode", "subtitles_and_voice")
         host._output_format = video.output_format
         host._output_speed = getattr(video, "output_speed", 1.0)
         host._original_volume = video.original_video_volume
@@ -196,6 +197,9 @@ class ProjectWorkspaceController:
         host.ttsVoiceOptionsChanged.emit()
         host.speakerModeChanged.emit()
         host.enableAudioSeparationChanged.emit()
+        signal = getattr(host, "automaticOutputModeChanged", None)
+        if signal is not None:
+            signal.emit()
         host.outputFormatChanged.emit()
         host.outputSpeedChanged.emit()
         host.originalVolumeChanged.emit()

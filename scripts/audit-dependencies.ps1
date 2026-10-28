@@ -87,6 +87,7 @@ foreach ($DependencyLock in $DependencyLocks) {
   $Arguments = @(
     "--from", "pip-audit==2.10.1",
     "pip-audit",
+    "--timeout", "60",
     "--requirement", $DependencyLock,
     "--no-deps",
     "--disable-pip",
@@ -131,6 +132,7 @@ try {
   $CanonicalArguments = @(
     "--from", "pip-audit==2.10.1",
     "pip-audit",
+    "--timeout", "60",
     "--requirement", $CanonicalRequirements,
     "--no-deps",
     "--disable-pip",

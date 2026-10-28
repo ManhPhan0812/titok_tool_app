@@ -82,3 +82,12 @@ desktop.ini
 runtime/douyin-browser/
 runtime/douyin-cloak/
 runtime/douyin-chromium/
+
+# Local application state must not be included in source releases.
+runtime/cache/
+runtime/config/
+runtime/engines/
+runtime/home/
+runtime/models/
+runtime/packages/
+runtime/tmp/

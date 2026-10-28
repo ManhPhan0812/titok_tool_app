@@ -349,8 +349,8 @@ def build_audio_timeline(
 ):
     """Compose cached audio layers without invoking a speech model.
 
-    ``require_voice_parts`` remains true for the automatic pipeline.  Manual
-    composition can set it to false to build an original/music-only mix, so
+    ``require_voice_parts`` defaults to true for dubbed exports. Manual and
+    automatic composition can disable it for an original/music-only mix, so
     changing levels never becomes dependent on TTS. ``fit_voice_to_slots``
     keeps legacy callers compatible, but never lengthens a short voice clip
     into source pauses; recognition must create separate spoken windows.

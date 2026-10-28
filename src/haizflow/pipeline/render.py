@@ -1573,8 +1573,9 @@ def render_video(
     subtitle_timeline_offset_seconds: float | None = None,
     export_preset: str = "source",
     output_speed: float = 1.0,
+    include_subtitles: bool = True,
 ):
-    """Render cropped video, positioned subtitles, and dubbed audio with FFmpeg."""
+    """Render cropped video, optional captions and a prepared audio mix with FFmpeg."""
     subtitle_style = SubtitleStyle.model_validate(subtitle_style.model_dump())
     process_key = str(process_registry_id or video_id)
     log_to_video(video_id, f"Starting video render. Format selected: '{output_format}'")
@@ -1585,7 +1586,7 @@ def render_video(
         raise ValueError("Crop zoom must be greater than zero.")
     if not os.path.isfile(voice_wav_path) or os.path.getsize(voice_wav_path) <= 44:
         raise RuntimeError("Final render requires a non-empty dubbed WAV track.")
-    if not os.path.isfile(srt_path) or os.path.getsize(srt_path) <= 0:
+    if include_subtitles and (not os.path.isfile(srt_path) or os.path.getsize(srt_path) <= 0):
         raise RuntimeError("Final render requires a non-empty subtitle file.")
     video_temp_dir = os.path.dirname(os.path.abspath(srt_path))
     source_width, source_height = get_video_dimensions(video_path)
@@ -1678,18 +1679,19 @@ def render_video(
             max(20, round(subtitle_height * float(raw.get("box_height_percent", 12)) / 100)),
         )
         cue_styles[int(index)] = (cue_style, cue_layout)
-    _write_positioned_ass(
-        srt_path,
-        ass_path,
-        effective_style,
-        subtitle_width,
-        subtitle_height,
-        ass_layout,
-        # One style is shared by every cue. Long translations are divided into
-        # sequential phrases instead of changing font size or aspect ratio.
-        fixed_font_size=True,
-        cue_styles=cue_styles or None,
-    )
+    if include_subtitles:
+        _write_positioned_ass(
+            srt_path,
+            ass_path,
+            effective_style,
+            subtitle_width,
+            subtitle_height,
+            ass_layout,
+            # One style is shared by every cue. Long translations are divided into
+            # sequential phrases instead of changing font size or aspect ratio.
+            fixed_font_size=True,
+            cue_styles=cue_styles or None,
+        )
     rel_video = _ffmpeg_path(video_path, video_temp_dir)
     rel_voice = _ffmpeg_path(voice_wav_path, video_temp_dir)
     rel_ass = _ffmpeg_path(ass_path, video_temp_dir)
@@ -1709,7 +1711,9 @@ def render_video(
     ass_filter_path = rel_ass.replace(":", "\\:").replace("'", "'\\\\''")
     font_filter_path = rel_font_directory.replace(":", "\\:").replace("'", "'\\\\''")
     ass_filter = f"ass='{ass_filter_path}':fontsdir='{font_filter_path}'"
-    if subtitle_timeline_offset_seconds is not None:
+    if not include_subtitles:
+        ass_filter = "null"
+    if include_subtitles and subtitle_timeline_offset_seconds is not None:
         # Keep absolute cue/karaoke clocks, including cues crossing the cut;
         # only pixels in the bounded input window are actually rendered.
         ass_filter = (f"setpts=PTS+{float(subtitle_timeline_offset_seconds):.6f}/TB,"

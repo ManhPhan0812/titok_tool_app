@@ -38,6 +38,8 @@ def configuration_snapshot(video, device: str, config=None) -> dict:
         settings[field] = value.model_dump(mode="json") if hasattr(value, "model_dump") else value
     # Normalize lightweight test fixtures and persisted models identically.
     settings = json.loads(json.dumps(settings, sort_keys=True))
+    if settings.get("automatic_output_mode") == "subtitles_and_voice":
+        settings.pop("automatic_output_mode")
     files = dict(getattr(video, "files", {}) or {})
     assets = {"video_input"}
     if not tool or tool in {"voice", "audio", "export"}:

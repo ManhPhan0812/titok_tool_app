@@ -93,8 +93,8 @@ ApplicationWindow {
         app.processEvents()
         details = window.findChild(QObject, "appUpdateDetailsLink")
         assert details is not None and details.property("visible")
-        assert details.property("text") == "haizflow.pages.dev"
-        assert details.property("destination").toString() == "https://haizflow.pages.dev/"
+        assert details.property("text") == "ManhPhan0812/titok_tool_app"
+        assert details.property("destination").toString() == "https://github.com/ManhPhan0812/titok_tool_app/releases"
         for checking_state in ("idle", "checking", "error", "no_release", "available"):
             state.setProperty("appUpdateState", checking_state)
             app.processEvents()

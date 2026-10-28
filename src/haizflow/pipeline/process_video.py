@@ -27,7 +27,7 @@ from haizflow.pipeline.render import render_video
 from haizflow.pipeline.subtitle import generate_srt
 from haizflow.pipeline.timing_contract import AUDIO_TIMELINE_VERSION, TIMING_SOURCE
 from haizflow.pipeline.tts import generate_voice_parts, resolve_tts_provider, voice_selection_identity
-from haizflow.schemas.video import SubtitleStyle
+from haizflow.schemas.video import SubtitleStyle, automatic_outputs
 from haizflow.services.video_store import get_video, log_to_video, update_video
 from haizflow.services.gemini_context import guidance as gemini_guidance
 from haizflow.services.translation import (
@@ -178,7 +178,7 @@ def _checkpoint_valid(video, name, signature, outputs):
 def _recognize_for_translation(video, reporter, audio_path, output_path):
     signature = _signature(
         _file_state(video.files["video_input"]), video.source_language,
-        getattr(video, "speech_recognition_model", "small"), video.enable_audio_separation,
+        getattr(video, "speech_recognition_model", "small"), video.enable_audio_separation and automatic_outputs(video)[1],
         TIMING_SOURCE, "recognition-progress-v1",
     )
     if (_checkpoint_valid(video, "recognition", signature, [output_path])
@@ -360,6 +360,14 @@ def _prepare_audio_mix(video, reporter, video_dir: str, fallback_audio_path: str
     # Upgrade the old ASR-only mono master before reusing translated/voice checkpoints.
     import wave
 
+    if not automatic_outputs(video)[1]:
+        source_master = os.path.join(video_dir, "temp", "audio.wav")
+        if not os.path.isfile(source_master) or os.path.getsize(source_master) <= 44:
+            reporter.update(12, "extracting_audio", "Preparing original audio")
+            extract_audio(_required_video_path(video, "video_input", must_exist=True), source_master, video.video_id,
+                          **({"allow_silence": True} if not any(automatic_outputs(video)) else {}))
+        return source_master, video.original_video_volume
+
     # A separated stem is normally 44.1 kHz; it is not the original master.
     # Inspect the source WAV only, otherwise every export re-runs Demucs and
     # can even overwrite a no-vocals stem with the original voice track.
@@ -511,7 +519,7 @@ def _translation_signature(video, video_input: str) -> str:
     return _signature(
         _file_state(video_input), TIMING_SOURCE,
         "gemini-batched-segments-v1" if using_gemini else "hymt2-semantic-source-context-retry-v21",
-        video.target_language, video.enable_audio_separation,
+        video.target_language, video.enable_audio_separation and automatic_outputs(video)[1],
         getattr(video, "speech_recognition_model", "small"),
         "gemini" if using_gemini else "hymt2",
         "gemini-segment-json-v1" if using_gemini else HYMT2_MODEL_REVISION,
@@ -529,11 +537,14 @@ def foreground_capability(video, manual_tool: str = "") -> str:
             return "translation"
         return {"voice": "voice", "translation": "recognition", "separation": "separation",
                 "source": "separation", "image": "ocr"}.get(manual_tool, "")
+    subtitles_enabled, dubbing_enabled = automatic_outputs(video)
+    if not subtitles_enabled and not dubbing_enabled:
+        return "ocr" if getattr(video, "remove_original_subtitles", False) else ""
     files = getattr(video, "files", {}) or {}
     source, transcript = files.get("video_input"), files.get("transcript_json")
     if source and transcript and _checkpoint_valid(video, "translation", _translation_signature(video, source), [transcript]):
-        return "voice"
-    return "separation" if getattr(video, "enable_audio_separation", False) else "recognition"
+        return "voice" if dubbing_enabled else ""
+    return "separation" if dubbing_enabled and getattr(video, "enable_audio_separation", False) else "recognition"
 
 
 def _complete_manual_stage(video_id: str, stage: str, progress: int) -> None:
@@ -604,6 +615,9 @@ def process_video_sync(
 
         video_dir = os.path.dirname(os.path.dirname(video_input))
         temp_audio_wav = os.path.join(video_dir, "temp", "audio.wav")
+        if not any(automatic_outputs(video)) and stop_after is None:
+            _finish_after_translation(video, reporter, video_dir, temp_audio_wav)
+            return
         source_segments_json = os.path.join(video_dir, "temp", "source_segments.json")
         translation_signature = _translation_signature(video, video_input)
 
@@ -693,7 +707,7 @@ def process_video_sync(
 
         transcribe_audio_target = temp_audio_wav
         original_audio_target = temp_audio_wav
-        if video.enable_audio_separation:
+        if video.enable_audio_separation and automatic_outputs(video)[1]:
             check_cancellation(video_id)
             from haizflow.core.model_integrity import DEMUCS_MODEL_SIGNATURE
 
@@ -878,6 +892,7 @@ def _original_subtitle_region_for_render(video, reporter, video_dir, *, pipeline
 
 
 def _finish_after_translation(video, reporter, video_dir, original_audio_target, *, stop_after=None):
+    subtitles_enabled, dubbing_enabled = automatic_outputs(video)
     video_id = video.video_id
     video_input = _required_video_path(video, "video_input", must_exist=True)
     from haizflow.services.video_export import export_destination
@@ -885,7 +900,7 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
     final_video = str(export_destination(video))
     srt_output = _required_video_path(video, "srt_output")
     voice_output = _required_video_path(video, "voice_output")
-    transcript_json = _required_video_path(video, "transcript_json", must_exist=True)
+    transcript_json = _required_video_path(video, "transcript_json", must_exist=subtitles_enabled or dubbing_enabled)
     voice_parts_dir = os.path.join(video_dir, "temp", "voice_parts")
     transcript_state = _file_state(transcript_json)
     subtitle_style = getattr(video, "subtitle_style", None) or SubtitleStyle()
@@ -893,7 +908,7 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
     # Subtitle rendering and voice generation are sibling branches. A visual
     # adjustment must not regenerate speech, and a voice adjustment must not
     # run OCR or subtitle formatting. Export/full-auto materialise both.
-    needs_subtitle_artifact = stop_after in {None, "subtitles", "render"}
+    needs_subtitle_artifact = subtitles_enabled and stop_after in {None, "subtitles", "render"}
     if needs_subtitle_artifact:
         check_cancellation(video_id)
         if _checkpoint_valid(video, "subtitles", subtitle_signature, [srt_output]) or _recovery_checkpoint_valid(
@@ -914,98 +929,103 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
         return
 
     check_cancellation(video_id)
-    target_language = str(getattr(video, "target_language", "vi") or "vi")
-    configured_tts_provider = str(getattr(video, "tts_provider", "omnivoice") or "omnivoice")
-    effective_tts_provider = resolve_tts_provider(configured_tts_provider, target_language)
-    with open(transcript_json, "r", encoding="utf-8") as transcript_file:
-        transcript_segments = json.load(transcript_file)
-    if not isinstance(transcript_segments, list) or not transcript_segments:
-        raise RuntimeError("The translated transcript contains no subtitle segments.")
-    voice_signature = _voice_checkpoint_signature(video, transcript_state, segments=transcript_segments)
-    for index, segment in enumerate(transcript_segments, 1):
-        if not isinstance(segment, dict) or not str(segment.get("text") or "").strip():
-            raise RuntimeError(f"Translated subtitle segment {index} is missing text.")
-    if effective_tts_provider == "vieneu":
-        from haizflow.core.vieneu_voices import han_text_notice
+    if dubbing_enabled:
+        target_language = str(getattr(video, "target_language", "vi") or "vi")
+        configured_tts_provider = str(getattr(video, "tts_provider", "omnivoice") or "omnivoice")
+        effective_tts_provider = resolve_tts_provider(configured_tts_provider, target_language)
+        with open(transcript_json, "r", encoding="utf-8") as transcript_file:
+            transcript_segments = json.load(transcript_file)
+        if not isinstance(transcript_segments, list) or not transcript_segments:
+            raise RuntimeError("The translated transcript contains no subtitle segments.")
+        voice_signature = _voice_checkpoint_signature(video, transcript_state, segments=transcript_segments)
+        for index, segment in enumerate(transcript_segments, 1):
+            if not isinstance(segment, dict) or not str(segment.get("text") or "").strip():
+                raise RuntimeError(f"Translated subtitle segment {index} is missing text.")
+        if effective_tts_provider == "vieneu":
+            from haizflow.core.vieneu_voices import han_text_notice
 
-        notice = han_text_notice(transcript_segments)
-        if notice:
-            raise ValueError(notice[1])
-    expected_parts = len(transcript_segments)
-    voice_outputs = [os.path.join(voice_parts_dir, f"voice_{index:04d}.mp3") for index in range(1, expected_parts + 1)]
-    if _checkpoint_valid(video, "voice", voice_signature, voice_outputs) or _recovery_checkpoint_valid(
-        video, "voice", voice_signature, voice_outputs
-    ):
-        reporter.update(82, "creating_voice", "Reusing generated voices", expected_parts, expected_parts)
+            notice = han_text_notice(transcript_segments)
+            if notice:
+                raise ValueError(notice[1])
+        expected_parts = len(transcript_segments)
+        voice_outputs = [os.path.join(voice_parts_dir, f"voice_{index:04d}.mp3") for index in range(1, expected_parts + 1)]
+        if _checkpoint_valid(video, "voice", voice_signature, voice_outputs) or _recovery_checkpoint_valid(
+            video, "voice", voice_signature, voice_outputs
+        ):
+            reporter.update(82, "creating_voice", "Reusing generated voices", expected_parts, expected_parts)
+        else:
+            reporter.update(65, "creating_voice", "Starting voice synthesis")
+            if effective_tts_provider in {"omnivoice", "vieneu"}:
+                # Translation and speech recognition can leave several GB of
+                # model weights resident on the GPU. OmniVoice runs in an
+                # isolated process, so hand the accelerator over before that
+                # worker loads its own checkpoint instead of waiting for an
+                # avoidable CUDA allocation failure.
+                shutdown_hymt2_worker()
+                _release_recognition_runtime()
+                log_to_video(
+                    video_id,
+                    "Released translation and speech-recognition models before local TTS.",
+                )
+            partial_signature_matches = (
+                (bool(video.resume_step) or bool(video.runtime_recovery_step) or getattr(video, "project_type", "single") == "manual")
+                and video.checkpoints.get("voice_partial") == voice_signature
+            )
+            if os.path.isdir(voice_parts_dir) and not partial_signature_matches:
+                shutil.rmtree(voice_parts_dir)
+            os.makedirs(voice_parts_dir, exist_ok=True)
+            # Persist the input signature before synthesis so an interrupted job
+            # can reuse verified clips and regenerate only missing segments.
+            _mark_checkpoint(video, "voice_partial", voice_signature)
+
+            def report_voice_progress(current, total):
+                detail = f"Verified voice audio {current} of {total}"
+                reporter.update(65 + round(17 * current / max(1, total)), "creating_voice", detail, current, total)
+
+            def report_voice_status(stage, current, total):
+                if stage == "identifying_speakers":
+                    reporter.update(65, "creating_voice", f"Identifying speakers {current} of {total}")
+                elif stage in {"synthesizing", "completed", "leveling_voice"}:
+                    report_voice_progress(current, total)
+                elif stage == 'retrying_short_utterance':
+                    reporter.update(65 + round(17 * current / max(1,total)), 'creating_voice',
+                        'Regenerating an invalid speech clip', current, total)
+                elif stage == "retrying_voice_on_cpu":
+                    reporter.update(65 + round(17 * current / max(1, total)), "creating_voice",
+                                    "Retrying voice synthesis on CPU", current, total)
+                else:
+                    reporter.update(65, "creating_voice", f"Preparing voice: {stage}")
+
+            try:
+                generate_voice_parts(
+                    transcript_json,
+                    voice_parts_dir,
+                    video.tts_voice,
+                    video_id,
+                    progress_callback=report_voice_progress,
+                    status_callback=report_voice_status,
+                    provider=_execution_models(video)["tts_provider"],
+                    target_language=target_language,
+                    keep_worker_warm=effective_tts_provider == "omnivoice",
+                )
+            finally:
+                if effective_tts_provider == "omnivoice":
+                    # Subtitle-editor preview and downstream regeneration share
+                    # one warm model, then release it before FFmpeg/rendering needs
+                    # the accelerator. This avoids both a second checkpoint load
+                    # and a long-lived VRAM reservation.
+                    from haizflow.pipeline.omnivoice_tts import release_model_memory
+
+                    release_model_memory()
+            _mark_checkpoint(video, "voice", voice_signature)
+
+        if stop_after == "voice":
+            _complete_manual_stage(video_id, "voice", 82)
+            return
+
     else:
-        reporter.update(65, "creating_voice", "Starting voice synthesis")
-        if effective_tts_provider in {"omnivoice", "vieneu"}:
-            # Translation and speech recognition can leave several GB of
-            # model weights resident on the GPU. OmniVoice runs in an
-            # isolated process, so hand the accelerator over before that
-            # worker loads its own checkpoint instead of waiting for an
-            # avoidable CUDA allocation failure.
-            shutdown_hymt2_worker()
-            _release_recognition_runtime()
-            log_to_video(
-                video_id,
-                "Released translation and speech-recognition models before local TTS.",
-            )
-        partial_signature_matches = (
-            (bool(video.resume_step) or bool(video.runtime_recovery_step) or getattr(video, "project_type", "single") == "manual")
-            and video.checkpoints.get("voice_partial") == voice_signature
-        )
-        if os.path.isdir(voice_parts_dir) and not partial_signature_matches:
-            shutil.rmtree(voice_parts_dir)
-        os.makedirs(voice_parts_dir, exist_ok=True)
-        # Persist the input signature before synthesis so an interrupted job
-        # can reuse verified clips and regenerate only missing segments.
-        _mark_checkpoint(video, "voice_partial", voice_signature)
-
-        def report_voice_progress(current, total):
-            detail = f"Verified voice audio {current} of {total}"
-            reporter.update(65 + round(17 * current / max(1, total)), "creating_voice", detail, current, total)
-
-        def report_voice_status(stage, current, total):
-            if stage == "identifying_speakers":
-                reporter.update(65, "creating_voice", f"Identifying speakers {current} of {total}")
-            elif stage in {"synthesizing", "completed", "leveling_voice"}:
-                report_voice_progress(current, total)
-            elif stage == 'retrying_short_utterance':
-                reporter.update(65 + round(17 * current / max(1,total)), 'creating_voice',
-                    'Regenerating an invalid speech clip', current, total)
-            elif stage == "retrying_voice_on_cpu":
-                reporter.update(65 + round(17 * current / max(1, total)), "creating_voice",
-                                "Retrying voice synthesis on CPU", current, total)
-            else:
-                reporter.update(65, "creating_voice", f"Preparing voice: {stage}")
-
-        try:
-            generate_voice_parts(
-                transcript_json,
-                voice_parts_dir,
-                video.tts_voice,
-                video_id,
-                progress_callback=report_voice_progress,
-                status_callback=report_voice_status,
-                provider=_execution_models(video)["tts_provider"],
-                target_language=target_language,
-                keep_worker_warm=effective_tts_provider == "omnivoice",
-            )
-        finally:
-            if effective_tts_provider == "omnivoice":
-                # Subtitle-editor preview and downstream regeneration share
-                # one warm model, then release it before FFmpeg/rendering needs
-                # the accelerator. This avoids both a second checkpoint load
-                # and a long-lived VRAM reservation.
-                from haizflow.pipeline.omnivoice_tts import release_model_memory
-
-                release_model_memory()
-        _mark_checkpoint(video, "voice", voice_signature)
-
-    if stop_after == "voice":
-        _complete_manual_stage(video_id, "voice", 82)
-        return
+        voice_signature = _signature("dubbing-disabled-v1")
+        voice_outputs = []
 
     check_cancellation(video_id)
     mix_audio_path, mix_audio_volume = _prepare_audio_mix(
@@ -1014,6 +1034,11 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
         video_dir,
         original_audio_target,
     )
+    mix_segments = transcript_json
+    if not dubbing_enabled:
+        # Never reuse old voice clips or duck music around a disabled dub.
+        mix_segments = os.path.join(video_dir, "temp", "original_audio_segments.json")
+        Path(mix_segments).write_text("[]", encoding="utf-8")
     timeline_signature = _signature(
         voice_signature,
         # A missing clip can be regenerated with the same synthesis inputs
@@ -1037,9 +1062,10 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
     ):
         reporter.update(87, "building_audio_timeline", "Reusing mixed audio checkpoint")
     else:
-        reporter.update(83, "building_audio_timeline", "Fitting voices to the video timeline")
+        reporter.update(83, "building_audio_timeline", "Fitting voices to the video timeline" if dubbing_enabled
+                        else "Mixing original audio and background music")
         build_audio_timeline(
-            transcript_json,
+            mix_segments,
             voice_parts_dir,
             video_input,
             voice_output,
@@ -1049,9 +1075,10 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
             background_music_path=(video.files or {}).get("background_music") or None,
             background_music_volume=getattr(video, "background_music_volume", 30),
             background_music_loop=video.background_music_loop,
-            ducking_enabled=video.audio_ducking_enabled,
+            ducking_enabled=video.audio_ducking_enabled and dubbing_enabled,
             ducking_reduction_db=video.audio_ducking_reduction_db,
-            tts_volume=getattr(video, "tts_volume", 100),
+            tts_volume=getattr(video, "tts_volume", 100) if dubbing_enabled else 0,
+            require_voice_parts=dubbing_enabled,
         )
         _mark_checkpoint(video, "timeline", timeline_signature)
 
@@ -1060,10 +1087,11 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
         return
 
     # Only presentation timing follows speech; editable source windows stay intact.
-    generate_srt(
-        transcript_json, srt_output, subtitle_style.max_chars_per_line, video_id,
-        preserve_segment_boundaries=True, voice_parts_dir=voice_parts_dir,
-    )
+    if subtitles_enabled:
+        generate_srt(
+            transcript_json, srt_output, subtitle_style.max_chars_per_line, video_id,
+            preserve_segment_boundaries=True, voice_parts_dir=voice_parts_dir if dubbing_enabled else None,
+        )
 
     check_cancellation(video_id)
     style_data = subtitle_style.model_dump() if hasattr(subtitle_style, "model_dump") else subtitle_style.dict()
@@ -1081,6 +1109,8 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
         *(["output-speed-v1", video.output_speed] if getattr(video, "output_speed", 1.0) != 1.0 else []),
         timeline_signature,
         subtitle_signature,
+        *(("automatic-outputs-v1", subtitles_enabled, dubbing_enabled)
+          if not (subtitles_enabled and dubbing_enabled) else ()),
         video.output_format,
         style_data,
         crop_data,
@@ -1161,6 +1191,7 @@ def _finish_after_translation(video, reporter, video_dir, original_audio_target,
             encoding_quality=int(preset_settings(getattr(video, "export_preset", "source"))["crf"]),
             export_preset=getattr(video, "export_preset", "source"),
             output_speed=getattr(video, "output_speed", 1.0),
+            **({"include_subtitles": False} if not subtitles_enabled else {}),
         )
         _mark_checkpoint(video, "render", render_signature)
 

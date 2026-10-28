@@ -3072,6 +3072,12 @@ Author and owner of HaizFlow.</translation>
         <source>Chỉnh sửa</source>
         <translation>Edit</translation>
     </message>
+    <message><source>Nội dung xuất</source><translation>Output content</translation></message>
+    <message><source>Chọn phụ đề dịch và lồng tiếng. Khi tắt lồng tiếng, âm thanh gốc được giữ theo mức âm lượng đã chọn. Phụ đề có sẵn trong video được xử lý riêng ở mục Phụ đề gốc.</source><translation>Choose translated subtitles and dubbing. Without dubbing, original audio is kept at the selected volume. Existing captions are controlled separately under Original subtitles.</translation></message>
+    <message><source>Phụ đề + lồng tiếng</source><translation>Subtitles and dubbing</translation></message>
+    <message><source>Chỉ phụ đề</source><translation>Subtitles only</translation></message>
+    <message><source>Chỉ lồng tiếng</source><translation>Dubbing only</translation></message>
+    <message><source>Không phụ đề, không lồng tiếng</source><translation>No subtitles or dubbing</translation></message>
 </context>
 <context>
     <name>ProjectCard</name>

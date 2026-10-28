@@ -119,6 +119,8 @@ class AudioSeparationTests(unittest.TestCase):
                     ),
                 ),
                 mock.patch.object(audio_separation.subprocess, "Popen", side_effect=start_process),
+                mock.patch.object(audio_separation, "engine_environment",
+                                  return_value={"HAIZFLOW_ENV_REGRESSION": "source-runtime"}),
                 mock.patch.object(audio_separation, "communicate_process", return_value=("", "")),
                 mock.patch.object(audio_separation, "check_cancellation"),
                 mock.patch.object(audio_separation, "log_to_video"),
@@ -130,6 +132,7 @@ class AudioSeparationTests(unittest.TestCase):
                 )
 
             self.assertEqual(captured_command[captured_command.index("-n") + 1], DEMUCS_MODEL_SIGNATURE)
+            self.assertEqual(captured_environment["HAIZFLOW_ENV_REGRESSION"], "source-runtime")
             self.assertEqual(
                 Path(captured_command[captured_command.index("--repo") + 1]),
                 repository,

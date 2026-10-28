@@ -20,10 +20,10 @@ from urllib.parse import urlparse
 from PySide6.QtCore import QObject, Signal
 
 from haizflow import __version__
+from haizflow.update.network import API as LATEST_RELEASE_API, REPOSITORY
 
-LATEST_RELEASE_API = "https://api.github.com/repos/MachHongHai/HaizFlow/releases/latest"
-RELEASES_URL = "https://github.com/MachHongHai/HaizFlow/releases"
-_RELEASE_URL_PREFIX = "https://github.com/MachHongHai/HaizFlow/releases/"
+RELEASES_URL = f"{REPOSITORY}/releases"
+_RELEASE_URL_PREFIX = f"{RELEASES_URL}/"
 _DOWNLOAD_URL_PREFIX = _RELEASE_URL_PREFIX + "download/"
 
 

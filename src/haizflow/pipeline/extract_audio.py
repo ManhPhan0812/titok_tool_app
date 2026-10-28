@@ -6,11 +6,11 @@ from haizflow.services.video_store import log_to_video
 from haizflow.pipeline.process_registry import check_cancellation, communicate_process
 from haizflow.utils.ffmpeg import _binary, get_media_stream_types
 
-def extract_audio(video_path: str, output_wav_path: str, video_id: str):
+def extract_audio(video_path: str, output_wav_path: str, video_id: str, *, allow_silence: bool = False):
     """Extract a stereo 48 kHz PCM master; ASR resamples its own input."""
     log_to_video(video_id, f"Extracting audio from: {video_path}")
     stream_types = get_media_stream_types(video_path)
-    if "audio" not in stream_types:
+    if "audio" not in stream_types and not allow_silence:
         message = (
             "The source video has no audio track, so speech cannot be transcribed or dubbed. "
             "Replace it with a video that includes audio."
@@ -36,6 +36,11 @@ def extract_audio(video_path: str, output_wav_path: str, video_id: str):
             "-c:a", "pcm_s24le",
             temporary_path,
         ]
+        if "audio" not in stream_types:
+            from haizflow.utils.ffmpeg import get_video_duration
+
+            cmd = [_binary("ffmpeg"), "-y", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+                   "-t", str(get_video_duration(video_path)), "-c:a", "pcm_s24le", temporary_path]
 
         check_cancellation(video_id)
         process = subprocess.Popen(

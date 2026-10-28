@@ -74,6 +74,8 @@ def render_revision(video) -> str:
         config["gemini_translation_style"] = guidance[3]
     if config.get("output_speed", 1.0) == 1.0:
         config.pop("output_speed", None)
+    if config.get("automatic_output_mode", "subtitles_and_voice") == "subtitles_and_voice":
+        config.pop("automatic_output_mode", None)
     media = {key: manual_artifacts.file_state((video.files or {}).get(key)) for key in (
         "video_input", "srt_output", "voice_output", "background_music", "watermark_image", "watermark_video",
     )}

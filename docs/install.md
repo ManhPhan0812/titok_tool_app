@@ -10,6 +10,8 @@ The 8 GB minimum means installed RAM (8 GiB DIMM capacity). Windows may reserve 
 
 For Quadro K1000M (2 GB) and other GPUs incompatible with the current engine, use **Settings → General → CPU**, then install **Whisper Small** and **HY-MT2 CPU Q4** in Resource packs. New projects use CPU model choices automatically. For existing projects, select Whisper Small CPU, HY-MT2 CPU Q4 and a CPU voice provider. NVIDIA confirms [K1000M has compute capability 3.0](https://forums.developer.nvidia.com/t/k1000m-cuda-driver-initialization-failed-you-might-not-have-a-cuda-gpu/226120/2); this architecture was [removed from CUDA 11.0](https://docs.nvidia.com/cuda/archive/11.0_GA/cuda-toolkit-release-notes/index.html). Reducing the VRAM check cannot make it run the current CUDA engine. [PyTorch 2.8 CUDA 12.8 binaries also exclude Maxwell and Pascal](https://dev-discuss.pytorch.org/t/cuda-toolkit-version-and-architecture-support-update-maxwell-and-pascal-architecture-support-removed-in-cuda-12-8-and-12-9-builds/3128).
 
+Starting with 1.0.6, install and select **Whisper Base · Legacy GPU (DirectCompute)** for recognition on K1000M while keeping the global processing device on CPU. Translation and voices use CPU; automatic hybrid routing for every task is not included. [Usage and limitations](legacy-gpu.md).
+
 Below 12 GiB usable RAM, speculative warm-up is disabled. The updated worker source uses one-item CPU recognition batches, at most two threads, and a 15-second translation idle timeout. Previously installed engine packs retain their batching/thread settings until rebuilt and updated separately. On an 8 GB machine, start without audio separation; use VieNeu CPU for Vietnamese or Edge TTS with internet access to reduce local AI memory demand. OmniVoice CPU remains available but needs sufficient live RAM and Windows commit headroom. These are routing/policy changes, not measured performance guarantees for K1000M hardware.
 
 For a 16 GB CPU system, choose Whisper Small CPU, HY-MT2 CPU Q4 and OmniVoice CPU. Heavy models run sequentially to reduce memory use; voice generation retains the original model quality and may be slow. Close unnecessary apps, allow Windows to manage the page file and leave enough free disk space on its drive. HaizFlow checks available RAM and Windows commit headroom before each heavy stage. Installed capacity alone does not guarantee that every stage can run under current memory pressure. Saved results remain available when additional memory is needed.
@@ -18,7 +20,7 @@ Allow space for the app, packs, source videos and exports. Setup shows the requi
 
 ## 2. Install the app
 
-**[Download HaizFlow-1.0.5-Setup.exe](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-Setup.exe).** This is the only file you need to install the app. Core files on the [release page](https://github.com/ManhPhan0812/titok_tool_app/releases/latest) are for automatic updates; do not download or extract them for installation.
+**[Download HaizFlow-1.0.6-Setup.exe](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-Setup.exe).** This is the only file you need to install the app. Core files on the [release page](https://github.com/ManhPhan0812/titok_tool_app/releases/latest) are for automatic updates; do not download or extract them for installation.
 
 1. Open **Setup.exe**, select the language and read the terms.
 2. Choose an installation folder on a drive with enough free space.

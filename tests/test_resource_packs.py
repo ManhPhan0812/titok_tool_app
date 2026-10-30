@@ -342,7 +342,7 @@ class ResourcePackManagerTests(unittest.TestCase):
             pack_ids = [row["packId"] for row in rows]
             self.assertEqual(len(pack_ids), len(set(pack_ids)))
             self.assertEqual(pack_ids, [
-                "model-whisper-small", "model-whisper-turbo",
+                "model-whisper-small", "model-whisper-turbo", "model-whisper-directcompute",
                 "model-hymt2-cpu", "model-hymt2-gpu", "model-omnivoice",
                 "model-vieneu",
                 "model-demucs-cpu", "model-demucs-gpu", "model-subtitle-ocr",

@@ -260,16 +260,59 @@ def run_translation_smoke(model: str) -> dict:
         translation.shutdown_hymt2_worker()
 
 
+def run_directcompute_smoke(audio: str, adapter: str) -> dict:
+    """Exercise frozen Core orchestration plus its installed CPU engine."""
+    if os.getenv("HAIZFLOW_SMOKE_TEST") != "1":
+        raise RuntimeError("DirectCompute acceptance requires an isolated smoke-test runtime.")
+    if not adapter or "microsoft basic" in adapter.lower():
+        raise ValueError("Select a real hardware GPU adapter for acceptance.")
+    from haizflow.core.hardware import configure_processing_device
+    from haizflow.core.paths import runtime_data_dir
+    from haizflow.pipeline import directcompute_transcribe
+    from haizflow.pipeline.manual_tools import transcribe
+    from haizflow.pipeline.timing_contract import TIMING_SOURCE
+    from haizflow.services.external_engine import close_shared_external_engine_pool
+    from haizflow.services.resource_packs import ResourcePackManager
+
+    configure_processing_device("cpu")
+    manager = ResourcePackManager()
+    missing = manager.missing_packs("recognition", {"device": "cpu", "model": "base-directcompute"})
+    if missing:
+        raise RuntimeError(f"DirectCompute acceptance fixture is incomplete: {missing}")
+    output = runtime_data_dir() / "directcompute-acceptance.json"
+    original_hint = directcompute_transcribe.adapter_hint
+    # Explicit test adapter selection permits testing this vendor-independent
+    # backend on an Intel workstation. The native CLI still enumerates and
+    # creates that actual device; this is not a physical K1000M benchmark.
+    directcompute_transcribe.adapter_hint = lambda _capabilities: adapter
+    try:
+        segments, language = transcribe(audio, str(output), "auto", "directcompute-acceptance",
+            model_name="base-directcompute", checkpoint_path=str(output.with_suffix(".progress.json")),
+            checkpoint_key="frozen-directcompute-v1")
+        if not segments or not all(row.get("timing_source") == TIMING_SOURCE for row in segments):
+            raise RuntimeError("DirectCompute acceptance did not produce CPU-validated sentence timing.")
+        return {"ok": True, "adapter": adapter, "language": language, "segments": segments,
+                "cpu_engine": manager.external_engine_pack("recognition", {"device": "cpu", "model": "small"}),
+                "physical_k1000m_tested": False}
+    finally:
+        directcompute_transcribe.adapter_hint = original_hint
+        close_shared_external_engine_pool()
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pre-finalize", action="store_true")
     parser.add_argument("--installed-layout", action="store_true")
     parser.add_argument("--translation-model", choices=("q4", "full"))
+    parser.add_argument("--directcompute-audio")
+    parser.add_argument("--directcompute-adapter")
     args = parser.parse_args(argv)
-    result = run_translation_smoke(args.translation_model) if args.translation_model else run_release_smoke(
-        pre_finalize=args.pre_finalize,
-        installed_layout=args.installed_layout,
-    )
+    if args.directcompute_audio:
+        result = run_directcompute_smoke(args.directcompute_audio, args.directcompute_adapter)
+    elif args.translation_model:
+        result = run_translation_smoke(args.translation_model)
+    else:
+        result = run_release_smoke(pre_finalize=args.pre_finalize, installed_layout=args.installed_layout)
     if sys.stdout is not None:
         print(json.dumps(result, ensure_ascii=True), flush=True)
     return 0 if result["ok"] else 1

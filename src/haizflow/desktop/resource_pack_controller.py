@@ -267,6 +267,10 @@ class ResourcePackController(QObject):
         if not getattr(self._host, "_startup_hardware_resolved", True):
             return True, ""  # A pending probe must not be presented as an absent GPU.
         capabilities = getattr(self._host, "_hardware_capabilities", None)
+        if pack_id == "model-whisper-directcompute":
+            from haizflow.core.directcompute import validate_hardware
+
+            return validate_hardware(capabilities, language=getattr(self._host, "_settings_language", "vi"))
         if capabilities is None:
             if pack_id in {"engine-cpu-py313", "engine-cuda128-py313", "model-whisper-small", "model-whisper-turbo", "model-hymt2-cpu", "model-hymt2-gpu", "model-demucs-cpu", "model-demucs-gpu"}:
                 return False, "Chưa đọc được cấu hình máy. Hãy kiểm tra lại trước khi cài gói xử lý."
@@ -283,7 +287,10 @@ class ResourcePackController(QObject):
     def _supporting_packs(self, pack_id: str) -> list[str]:
         """Each visible model installs its matching runtime as one operation."""
         context = self._display_context()
-        if pack_id == "model-whisper-small":
+        if pack_id == "model-whisper-directcompute":
+            capability = "recognition"
+            context.update(device="cpu", model="base-directcompute")
+        elif pack_id == "model-whisper-small":
             capability = "recognition"
             context["model"] = "small-cpu" if context["model"] == "small-cpu" else "small"
         elif pack_id == "model-whisper-turbo":
@@ -322,7 +329,7 @@ class ResourcePackController(QObject):
         """Present only independently installable, large model downloads."""
         vi = getattr(self._host, "_settings_language", "vi") == "vi"
         ordered_ids = [
-            "model-whisper-small", "model-whisper-turbo",
+            "model-whisper-small", "model-whisper-turbo", "model-whisper-directcompute",
             "model-hymt2-cpu", "model-hymt2-gpu", "model-omnivoice", "model-vieneu",
             "model-demucs-cpu", "model-demucs-gpu", "model-subtitle-ocr",
             "browser-douyin-chromium",
@@ -331,6 +338,7 @@ class ResourcePackController(QObject):
         descriptions = {
             "model-whisper-small": "Nhận dạng lời nói trên CPU hoặc GPU.",
             "model-whisper-turbo": "Nhận dạng nhanh trên GPU NVIDIA.",
+            "model-whisper-directcompute": "Whisper Base nhẹ hơn Small, độ chính xác có thể thấp hơn. GPU Direct3D 11 (K1000M); nhận diện ngôn ngữ và căn thời gian dùng CPU.",
             "model-hymt2-cpu": "Dịch cục bộ bằng bản Q4, dùng CPU.",
             "model-hymt2-gpu": "Dịch bằng model đầy đủ trên GPU NVIDIA.",
             "model-omnivoice": "Giọng đọc và nhân bản giọng. Dùng chung cho OmniVoice CPU và GPU.",
@@ -374,7 +382,8 @@ class ResourcePackController(QObject):
                 source["detail"] = "Cần cài môi trường xử lý." if vi else "The processing runtime needs to be installed."
             needs_download = supporting or source.get("status") in {"missing", "paused", "failed"}
             runtime_available = all(
-                self.manager.archive_available(item) for item in supporting
+                bool(self.manager.definitions[item].assets) or self.manager.archive_available(item)
+                for item in supporting
             )
             if needs_download:
                 total_download = int(source.get("downloadSize", 0)) + sum(

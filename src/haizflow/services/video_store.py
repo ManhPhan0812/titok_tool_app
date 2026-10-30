@@ -518,7 +518,7 @@ def _migrate_video_metadata(raw_data: dict) -> tuple[dict, bool]:
                     )
                 if override.get("provider") not in {"omnivoice", "omnivoice-gpu", "edge"}:
                     override["provider"] = "omnivoice"
-    if data.get("speech_recognition_model") not in {"small", "small-cpu", "small-gpu", "large-v3-turbo"}:
+    if data.get("speech_recognition_model") not in {"small", "small-cpu", "small-gpu", "large-v3-turbo", "base-directcompute"}:
         data["speech_recognition_model"] = "small"
     if data.get("translation_model") not in {"auto", "q4", "full", "gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.8-flash"}:
         data["translation_model"] = "q4"

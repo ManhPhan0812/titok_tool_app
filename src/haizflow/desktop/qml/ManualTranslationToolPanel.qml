@@ -21,7 +21,7 @@ ColumnLayout {
     SettingLabel {
         Layout.fillWidth: true
         text: qsTr("Model nhận dạng")
-        helpText: qsTr("Turbo cần GPU. Small dùng ít bộ nhớ hơn và hỗ trợ CPU.")
+        helpText: qsTr("Small hỗ trợ CPU. Base · GPU cũ dùng DirectCompute, phù hợp K1000M; độ chính xác có thể thấp hơn Small. Turbo cần GPU NVIDIA mới.")
     }
     AppComboBox {
         Layout.fillWidth: true

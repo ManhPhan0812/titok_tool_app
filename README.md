@@ -2,7 +2,7 @@
   <img src="src/haizflow/desktop/assets/branding/haizflow-mark.png" width="96" alt="HaizFlow logo">
   <h1>HaizFlow</h1>
   <p><strong>A free Windows app for downloading, translating, subtitling and dubbing videos.</strong></p>
-  <p><a href="https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-Setup.exe">Installation</a> · <a href="docs/user-guide.md">User guide</a> · <a href="docs/support.md">Help</a> · <a href="README.vi.md">Tiếng Việt</a></p>
+  <p><a href="https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-Setup.exe">Installation</a> · <a href="docs/user-guide.md">User guide</a> · <a href="docs/support.md">Help</a> · <a href="README.vi.md">Tiếng Việt</a></p>
 </div>
 
 ## About HaizFlow
@@ -83,7 +83,7 @@ Gemini, Zernio and other external services have their own terms, limits and char
 
 ## Install and get started
 
-**[Download the Windows installer](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-Setup.exe).** Run this EXE only; do not download or extract Core files. Fork version 1.0.4 can update directly in the app. Install Setup once to switch an upstream installation to this fork channel. Then update the CPU/GPU engines in Resource Packs when prompted; existing models and projects are kept. Install the new Setup to receive the updated startup launcher as well. [Release and installation details](https://github.com/ManhPhan0812/titok_tool_app/releases/latest).
+**[Download the Windows installer](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-Setup.exe).** Run this EXE only; do not download or extract Core files. Fork version 1.0.4 can update directly in the app. Install Setup once to switch an upstream installation to this fork channel. Then update the CPU/GPU engines in Resource Packs when prompted; existing models and projects are kept. Install the new Setup to receive the updated startup launcher as well. [Release and installation details](https://github.com/ManhPhan0812/titok_tool_app/releases/latest).
 
 1. Install and open HaizFlow. Vietnamese is the default; English is available in Settings.
 2. Choose CPU or NVIDIA GPU in **Settings → General**, then install the resource packs you need.
@@ -93,6 +93,8 @@ Gemini, Zernio and other external services have their own terms, limits and char
 Supported systems are Windows 10 version 1809 or later and Windows 11 x64, with at least 8 GB installed RAM and 6 GiB OS-usable RAM (16 GB or more recommended). Installer users do not need Python. Resource packs, projects and exports need additional storage; Setup and the Resource packs page show their corresponding requirements.
 
 GPU mode supports compatible NVIDIA 4 GB-class cards (at least 3.5 GiB dedicated VRAM reported by CUDA). The shipped PyTorch 2.8/CUDA 12.8 engine requires compute capability 7.0 or newer; driver and native engine validation must also pass. Older or smaller cards, including Quadro K1000M 2 GB, use CPU mode with Whisper Small CPU and HY-MT2 CPU Q4. Below 12 GiB usable RAM, speculative model loading is disabled; the updated worker source uses batch size 1 and two CPU threads (existing engine packs need a separate rebuild/update for these worker settings). On compatible 4 GB cards, use Whisper Small GPU, HY-MT2 CPU Q4 or Gemini, and OmniVoice GPU; heavy stages run sequentially. Whisper Turbo and full HY-MT2 GPU need more VRAM. Available VRAM and system memory still matter at runtime. Windows Smart App Control or an Application Control policy may block this unsigned build; see the [installation guide](docs/install.md).
+
+Version 1.0.6 adds **Whisper Base · Legacy GPU (DirectCompute)** for recognition on K1000M, keeping translation and voices on CPU. This is an explicit recognition choice; automatic hybrid routing for all tasks is not included. [Usage and limitations](docs/legacy-gpu.md).
 
 See [Installation](docs/install.md) for CPU/GPU packs, API keys and storage. See the [User guide](docs/user-guide.md) for projects, captions, dubbing and publishing.
 

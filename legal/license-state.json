@@ -10,14 +10,14 @@
     "basis": "Explicit owner approval and request to clarify redistribution and commercial software restrictions",
     "language_precedence": "vi"
   },
-  "effective_release": "Fork 1.0.5 low-memory CPU compatibility release; actual publication tracked by GitHub release state",
+  "effective_release": "Fork 1.0.6 explicit DirectCompute recognition release; actual publication tracked by GitHub release state",
   "public_release_review": {
     "approved_by": "Codex (scoped technical packaging review, not independent legal certification)",
     "approved_at": "2026-10-30",
-    "source_commit": "64b9352 plus final resource pins and release metadata (final clean commit bound by BUILD-INFO)",
-    "release_version": "1.0.5",
-    "owner_release_authorization": "Direct user request to build and publish a new fork release for their home PC. User previously stated written author permission for fork distribution in this conversation; not independently verified.",
-    "publication_condition": "Complete all technical publication conditions in legal/reviews/fork-packaging-1.0.5.md. Preserve source license and original attribution, previous immutable releases, model restrictions and unsigned caveats. This is a scoped technical review only.",
+    "source_commit": "45bf3e0 plus DirectCompute integration and release metadata (final clean commit bound by BUILD-INFO)",
+    "release_version": "1.0.6",
+    "owner_release_authorization": "Direct user request to publish this version. User earlier stated written author permission for fork distribution in this conversation; not independently verified.",
+    "publication_condition": "Complete all technical publication conditions in legal/reviews/fork-packaging-1.0.6.md. Preserve original license/attribution, previous immutable releases, model restrictions and unsigned caveats; no claim of all-task GPU or physical K1000M validation.",
     "clearances": {
       "owned-code-and-contributor-scope": {
         "path": "legal/reviews/application-scope-2026-10-06.md",
@@ -28,8 +28,8 @@
         "sha256": "fd3764dcb816168e9ec62737823ecf9eca79655e39999b5073779ac927cd7702"
       },
       "ffmpeg-complete-corresponding-source": {
-        "path": "legal/reviews/fork-packaging-1.0.5.md",
-        "sha256": "d56ed4e30320c36c50dbb99ae646af7e0862401865fbee503fe5988bfa690a63"
+        "path": "legal/reviews/fork-packaging-1.0.6.md",
+        "sha256": "4b87dbfaafba0f33e238dd39571b7abc4673ff04f7c32038633461a7064e265d"
       },
       "qt-lgpl-module-and-relinking-evidence": {
         "path": "legal/reviews/qt-replacement-2026-10-06.md",

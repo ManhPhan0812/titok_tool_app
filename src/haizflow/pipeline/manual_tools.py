@@ -98,6 +98,11 @@ def detect_original_subtitle_region(*args, **kwargs):
 
 
 def transcribe(*args, **kwargs):
+    if kwargs.get("model_name") == "base-directcompute":
+        from haizflow.pipeline.directcompute_transcribe import transcribe as directcompute
+
+        options = {key: value for key, value in kwargs.items() if key != "model_name"}
+        return directcompute(*args, **options, cpu_transcribe=transcribe)
     from haizflow.core.hardware import processing_device_preference
     from haizflow.core.model_choices import recognition_context
     from haizflow.services.external_tasks import run_external_task

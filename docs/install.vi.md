@@ -10,6 +10,8 @@ Mức 8 GB là RAM lắp đặt (8 GiB theo đơn vị bộ nhớ). Windows có 
 
 Với **Quadro K1000M 2 GB**, chọn **Cài đặt → Chung → CPU**, cài **Whisper Small** và **HY-MT2 CPU Q4** trong Gói tài nguyên. Dự án mới tự chọn model CPU; dự án cũ cần chọn Whisper Small CPU, HY-MT2 CPU Q4 và giọng CPU. [K1000M có compute capability 3.0](https://forums.developer.nvidia.com/t/k1000m-cuda-driver-initialization-failed-you-might-not-have-a-cuda-gpu/226120/2), không tương thích bộ CUDA hiện tại; giảm ngưỡng VRAM không khắc phục được giới hạn này.
 
+Từ 1.0.6, có thể cài và chọn **Whisper Base · GPU cũ (DirectCompute)** để nhận dạng trên K1000M, giữ bộ xử lý chung là CPU. Bước dịch và giọng đọc dùng CPU; chưa có định tuyến hỗn hợp tự động cho mọi tác vụ. [Hướng dẫn và giới hạn](legacy-gpu.md).
+
 Máy có dưới 12 GiB RAM Windows dùng được sẽ không nạp model đón trước; mã worker mới dùng Whisper batch 1, tối đa 2 luồng và giải phóng worker dịch sau 15 giây rảnh. Gói engine đã cài từ trước giữ cách chia batch/luồng của phiên bản đó cho đến khi được build và cập nhật riêng. Trên máy 8 GB, nên bắt đầu với VieNeu CPU cho tiếng Việt hoặc Edge TTS qua Internet, tắt tách giọng nếu không cần; OmniVoice CPU vẫn cần đủ RAM trống và bộ nhớ cấp phát. Chưa có benchmark trực tiếp trên K1000M.
 
 Trên máy 16 GB không có GPU phù hợp, nên chọn Whisper Small CPU, HY-MT2 CPU Q4 và OmniVoice CPU. Các model chạy lần lượt để giảm RAM chiếm dụng. Giọng đọc CPU vẫn dùng chất lượng model gốc và có thể chạy chậm. Đóng ứng dụng không cần thiết, để Windows tự quản lý bộ nhớ ảo và dành đủ dung lượng trống cho ổ chứa bộ nhớ ảo. HaizFlow kiểm tra RAM trống và lượng bộ nhớ Windows còn cấp phát được trước từng bước nặng; đủ RAM lắp đặt không có nghĩa mọi bước đều chạy được khi máy đang thiếu bộ nhớ. Khi cần thêm bộ nhớ, kết quả đã lưu vẫn được giữ để xử lý tiếp sau khi giải phóng tài nguyên.
@@ -18,7 +20,7 @@ Chọn ổ còn đủ chỗ cho ứng dụng, tài nguyên, video nguồn và vi
 
 ## 2. Cài ứng dụng
 
-**[Tải HaizFlow-1.0.5-Setup.exe](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-Setup.exe).** Đây là file duy nhất bạn cần để cài ứng dụng. Các tệp Core ở [trang phiên bản](https://github.com/ManhPhan0812/titok_tool_app/releases/latest) dành cho cập nhật tự động; không tải hoặc giải nén chúng để cài.
+**[Tải HaizFlow-1.0.6-Setup.exe](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-Setup.exe).** Đây là file duy nhất bạn cần để cài ứng dụng. Các tệp Core ở [trang phiên bản](https://github.com/ManhPhan0812/titok_tool_app/releases/latest) dành cho cập nhật tự động; không tải hoặc giải nén chúng để cài.
 
 1. Mở tệp **Setup.exe**, chọn ngôn ngữ và đọc điều kiện sử dụng.
 2. Chọn thư mục cài. Có thể dùng ổ D hoặc ổ khác còn đủ chỗ.

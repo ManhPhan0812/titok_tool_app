@@ -302,6 +302,16 @@ def built_in_pack_definitions() -> tuple[ResourcePackDefinition, ...]:
             ("engine-vision-onnx",),
         ),
     ]
+    from haizflow.core.directcompute import PACK_ID, assets as directcompute_assets
+
+    legacy_assets = directcompute_assets()
+    definitions.append(ResourcePackDefinition(
+        pack_id=PACK_ID, label="Whisper Base · GPU cũ (DirectCompute)", group="recognition",
+        version="1", capability="recognition", backend="directcompute",
+        dependencies=("engine-cpu-py313", "model-whisper-small"), assets=legacy_assets,
+        download_size=sum(asset.size for asset in legacy_assets),
+        installed_size=sum(asset.size for asset in legacy_assets),
+    ))
     speaker_asset = _speaker_asset()
     definitions.append(ResourcePackDefinition(
         pack_id="model-speaker-identification", label="Nhận diện người nói",
@@ -775,6 +785,8 @@ class ResourcePackManager:
             "ocr": ["engine-vision-onnx", "model-subtitle-ocr"],
             "speaker": speaker_packs,
         }
+        if capability == "recognition" and recognition_model == "base-directcompute":
+            mapping["recognition"] = ["engine-cpu-py313", "model-whisper-small", "model-whisper-directcompute"]
         return list(dict.fromkeys(mapping.get(str(capability), [])))
 
     def missing_packs(self, capability: str, context: dict | None = None) -> list[str]:
@@ -912,6 +924,11 @@ class ResourcePackManager:
     def _verify_model_pack(self, definition: ResourcePackDefinition) -> None:
         root = models_dir()
         pack_id = definition.pack_id
+        if pack_id == "model-whisper-directcompute":
+            from haizflow.core.directcompute import verify_payload
+
+            verify_payload(root)
+            return
         if pack_id == "model-whisper-small":
             verify_whisper_model(root / "whisper" / "small")
             verify_whisperx_vad_model(root / "whisperx-vad")

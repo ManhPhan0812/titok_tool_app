@@ -138,7 +138,7 @@ GridLayout {
                 Layout.fillWidth: true
                 text: AppController.processingDevice === "gpu"
                 ? qsTr("Chế độ GPU: có thể chọn model GPU hoặc CPU.")
-                    : qsTr("Chế độ CPU: model GPU chưa khả dụng. Đổi bộ xử lý trong Cài đặt → Chung để sử dụng GPU.")
+                    : qsTr("Chế độ CPU: có thể chọn Whisper Base · GPU cũ để nhận dạng bằng DirectCompute; dịch và giọng đọc vẫn dùng CPU.")
                 color: Theme.textMuted
                 font.pixelSize: TypeScale.metadata
                 wrapMode: Text.Wrap
@@ -148,7 +148,7 @@ GridLayout {
             SettingLabel {
                 Layout.fillWidth: true
                 text: qsTr("Nhận dạng giọng nói")
-                helpText: qsTr("Turbo cần GPU NVIDIA. Small dùng được trên CPU và GPU.")
+                helpText: qsTr("Turbo cần GPU NVIDIA mới. Small dùng CPU hoặc CUDA. Base · GPU cũ dùng DirectCompute, phù hợp K1000M; độ chính xác có thể thấp hơn Small.")
             }
             StudioComboBox {
                 Layout.fillWidth: true

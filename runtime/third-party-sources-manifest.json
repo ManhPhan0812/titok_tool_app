@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "release_version": "1.0.5",
-  "file": "HaizFlow-1.0.5-ThirdPartySources.zip",
-  "sha256": "281eefc5f0173787df69bfcdfc385f2f7a870d4757548b77d8e435f446c552d1",
-  "size": 847739320,
-  "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-ThirdPartySources.zip",
+  "release_version": "1.0.6",
+  "file": "HaizFlow-1.0.6-ThirdPartySources.zip",
+  "sha256": "9e309b5b814b9a437110a2af00ec1357ff7d22523d8b042492fe30f993a09d15",
+  "size": 847758204,
+  "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-ThirdPartySources.zip",
   "files": [
     {
       "file": "ffmpeg-cli/build-msys2.sh",
@@ -3410,6 +3410,16 @@
       "file": "licenses/WESPEAKER-NOTICE.md",
       "size": 1006,
       "sha256": "b863de4c9b76dda5c15a6c0dca637cae4c0bd56daf039f9e13d6a83219841b06"
+    },
+    {
+      "file": "licenses/WHISPER-DIRECTCOMPUTE-MPL-2.0.txt",
+      "size": 16725,
+      "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+    },
+    {
+      "file": "licenses/WHISPER-DIRECTCOMPUTE-NOTICE.md",
+      "size": 1492,
+      "sha256": "614929553198f892c54256a7eef6b868d50bc222f0fbd6c970d46ee8fc1e13c0"
     },
     {
       "file": "scripts/ffmpeg/build-msys2.sh",

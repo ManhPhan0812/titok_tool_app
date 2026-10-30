@@ -1,6 +1,6 @@
 """Lightweight model/device choices shared by Core, workers and desktop UI."""
 
-RECOGNITION_CHOICES = frozenset({"small", "small-cpu", "small-gpu", "large-v3-turbo"})
+RECOGNITION_CHOICES = frozenset({"small", "small-cpu", "small-gpu", "large-v3-turbo", "base-directcompute"})
 _FOUR_GB_GPU_LIMIT_BYTES = 5 * 1024**3
 _LEGACY_AUTO_FULL_VRAM_BYTES = 12 * 1024**3
 
@@ -67,6 +67,8 @@ def recognition_context(choice: str, app_device: str) -> dict[str, str]:
     device = "gpu" if app_device == "gpu" else "cpu"
     if choice not in RECOGNITION_CHOICES:
         raise ValueError(f"Unsupported recognition model: {choice}")
+    if choice == "base-directcompute":
+        return {"model": choice, "device": "cpu"}
     if choice == "small-cpu":
         device = "cpu"
     elif choice in {"small-gpu", "large-v3-turbo"}:

@@ -1428,8 +1428,22 @@ class HaizFlowController(QObject):
     @speechRecognitionModel.setter
     def speechRecognitionModel(self, value):
         requested = str(value or "small").strip().lower()
-        if requested not in {"small", "small-cpu", "small-gpu", "large-v3-turbo"}:
+        if requested not in {"small", "small-cpu", "small-gpu", "large-v3-turbo", "base-directcompute"}:
             requested = "small"
+        if requested == "base-directcompute":
+            from haizflow.core.directcompute import validate_hardware
+
+            if not self._ensure_hardware_ready_for_action():
+                return
+            allowed, reason = validate_hardware(getattr(self, "_hardware_capabilities", None),
+                language=getattr(self, "_settings_language", "vi"))
+            if not allowed:
+                self._show_app_alert("Whisper DirectCompute", reason, "warning")
+                return
+            packs = getattr(self, "_resource_packs", None)
+            if packs is not None and packs.manager.missing_packs("recognition", {"model": requested, "device": "cpu"}):
+                self._show_app_alert("Thiếu Whisper DirectCompute",
+                    "Hãy cài Whisper Base · GPU cũ trong Gói tài nguyên trước khi nhận dạng.", "warning")
         if requested in {"small-gpu", "large-v3-turbo"} and getattr(self, "_settings_processing_device", "cpu") != "gpu":
             self._show_app_alert("Đang dùng chế độ CPU", "Chọn Whisper CPU hoặc chuyển sang GPU trong Cài đặt → Chung.", "warning")
             return
@@ -1468,6 +1482,12 @@ class HaizFlowController(QObject):
         # authoritative result instead of permanently disabling Turbo.
         gpu_available = HaizFlowController._project_gpu_available(self)
         turbo_available = HaizFlowController._heavy_gpu_models_available(self)
+        from haizflow.core.directcompute import validate_hardware
+
+        directcompute_available = validate_hardware(getattr(self, "_hardware_capabilities", None))[0]
+        directcompute_option = {"value": "base-directcompute",
+            "label": "Whisper Base · GPU cũ (DirectCompute)" if getattr(self, "_settings_language", "en") == "vi"
+                else "Whisper Base · Legacy GPU (DirectCompute)", "available": directcompute_available}
         if getattr(self, "_settings_language", "en") == "vi":
             return [
                 {"value": "small-cpu", "label": "Whisper Small · CPU", "available": True},
@@ -1477,6 +1497,7 @@ class HaizFlowController(QObject):
                     "label": "Whisper Turbo · GPU NVIDIA",
                     "available": turbo_available,
                 },
+                directcompute_option,
             ]
         return [
             {"value": "small-cpu", "label": "Whisper Small · CPU", "available": True},
@@ -1486,10 +1507,13 @@ class HaizFlowController(QObject):
                 "label": "Whisper Turbo · NVIDIA GPU",
                 "available": turbo_available,
             },
+            directcompute_option,
         ]
 
     @Property(int, notify=speechRecognitionModelChanged)
     def speechRecognitionModelIndex(self):
+        if self._speech_recognition_model == "base-directcompute":
+            return 3
         if self._speech_recognition_model == "large-v3-turbo":
             return 2
         return 1 if self._speech_recognition_model == "small-gpu" or (
@@ -3458,7 +3482,9 @@ class HaizFlowController(QObject):
             "recommendedDevice": recommended_processing_device(capabilities),
             "processingAdvice": (
                 validate_processing_device("gpu", capabilities, language=self._settings_language)[1]
-                if capabilities.cuda_available and not capabilities.gpu_supported else ""
+                if (capabilities.cuda_available or "k1000m" in " ".join((
+                    capabilities.active_display_gpu_name, *capabilities.detected_graphics)).lower())
+                and not capabilities.gpu_supported else ""
             ),
             "profileLabel": profile.label,
         }
@@ -4224,7 +4250,7 @@ class HaizFlowController(QObject):
     ):
         # Keep direct Python callers from older integrations working while the
         # QML-facing signature carries the new ASR model field.
-        if speech_recognition_model not in {"small", "small-cpu", "small-gpu", "large-v3-turbo"}:
+        if speech_recognition_model not in {"small", "small-cpu", "small-gpu", "large-v3-turbo", "base-directcompute"}:
             legacy_provider = speech_recognition_model
             legacy_voice = tts_provider
             legacy_separation = bool(tts_voice)

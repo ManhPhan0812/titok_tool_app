@@ -11,6 +11,7 @@ Item {
         switch (packId) {
         case "model-whisper-small": return qsTr("Whisper Small");
         case "model-whisper-turbo": return qsTr("Whisper Turbo");
+        case "model-whisper-directcompute": return qsTr("Whisper Base · GPU cũ (DirectCompute)");
         case "model-hymt2-cpu": return qsTr("HY-MT2 CPU");
         case "model-hymt2-gpu": return qsTr("HY-MT2 GPU");
         case "model-omnivoice": return qsTr("OmniVoice");
@@ -34,6 +35,7 @@ Item {
         switch (packId) {
         case "model-whisper-small": return qsTr("Nhận dạng lời nói bằng CPU hoặc GPU");
         case "model-whisper-turbo": return qsTr("Nhận dạng nhanh bằng GPU NVIDIA");
+        case "model-whisper-directcompute": return qsTr("GPU Direct3D 11, gồm K1000M · Base nhẹ hơn Small, độ chính xác có thể thấp hơn · Căn thời gian dùng CPU");
         case "model-hymt2-cpu": return qsTr("Dịch cục bộ bằng bản Q4");
         case "model-hymt2-gpu": return qsTr("Dịch bằng model đầy đủ trên GPU NVIDIA");
         case "model-omnivoice": return qsTr("Tạo giọng đọc cục bộ");

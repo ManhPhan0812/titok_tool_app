@@ -566,15 +566,27 @@ def validate_processing_device(
     capabilities = capabilities or detect_hardware_capabilities()
     if preference == "gpu":
         if not capabilities.cuda_available:
+            from haizflow.core.directcompute import adapter_hint
+
+            if adapter_hint(capabilities):
+                return False, (
+                    "GPU này chưa chạy được bộ CUDA hiện tại. Giữ CPU và chọn Whisper Base · GPU cũ "
+                    "(DirectCompute) để nhận dạng; dịch và giọng đọc dùng CPU."
+                    if language == "vi" else
+                    "This GPU cannot use the current CUDA engine. Keep CPU and select Whisper Base · Legacy GPU "
+                    "(DirectCompute) for recognition; translation and voices use CPU."
+                )
             return False, "Không phát hiện GPU NVIDIA tương thích CUDA." if language == "vi" else "CUDA-compatible NVIDIA GPU was not detected."
         if not capabilities.cuda_architecture_supported:
             major, minor = capabilities.effective_cuda_capability
             return False, (
                 f"{capabilities.cuda_name} (compute capability {major}.{minor}) không tương thích bộ xử lý GPU hiện tại. "
-                "Hãy chọn CPU, Whisper Small CPU và HY-MT2 CPU Q4; không cần card rời để xử lý."
+                "Giữ bộ xử lý CPU và HY-MT2 CPU Q4. Nhận dạng có thể chọn Whisper Small CPU "
+                "hoặc Whisper Base · GPU cũ (DirectCompute) sau khi cài gói tương ứng."
                 if language == "vi" else
                 f"{capabilities.cuda_name} (compute capability {major}.{minor}) is incompatible with the current GPU engine. "
-                "Choose CPU, Whisper Small CPU and HY-MT2 CPU Q4; a dedicated GPU is optional."
+                "Keep CPU processing and HY-MT2 CPU Q4. Choose Whisper Small CPU "
+                "or Whisper Base · Legacy GPU (DirectCompute) after installing its pack."
             )
         if capabilities.total_vram_bytes < _MIN_GPU_VRAM_BYTES:
             available = capabilities.total_vram_bytes / _GIB

@@ -27,6 +27,7 @@ HaizFlow's source license does not replace any component's independent terms.
 | Python / other locked wheels | Core and respective engine packs | Generated inventory with license texts; missing direct-dependency evidence fails the strict generator. Transitive evidence still needs review; metadata is not inferred permission. |
 | HaizFlow logo and voice samples | Bundled branding and preview audio | Ownership/provenance of artwork, reference voices and generated outputs must be confirmed separately. Creator attribution alone is not proof. |
 | VieNeu 3.8.3 / sea-g2p 0.10.0 / kaldi-native-fbank 1.22.3 | Optional, checksum-pinned VieNeu resource pack; no installation into Core | Apache-2.0 notices and license texts retained in the original wheel dist-info directories. [Backend and pinned-model delivery scope](docs/vieneu-backend.md). MOSS codec source retains its original Apache-2.0 headers. Model and voice rights remain independent. |
+| Const-me/Whisper 1.12.0 / Whisper Base GGML | Optional direct upstream downloads for DirectCompute ASR, including K1000M; not bundled in Core or the CPU engine | [Supplier/source and original notices](licenses/WHISPER-DIRECTCOMPUTE-NOTICE.md), [MPL-2.0 license](licenses/WHISPER-DIRECTCOMPUTE-MPL-2.0.txt), and original LZ4 notice retained in CLI ZIP. Model license is independent. [Usage and validation](docs/legacy-gpu.md). |
 
 See the [Douyin distribution decision](docs/douyin-distribution.md) for the
 separation between the bundled driver and direct upstream browser download.

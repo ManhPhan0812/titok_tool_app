@@ -128,6 +128,8 @@ class SmartWarmupController:
                                       or str(context.get("provider") or "").startswith("vieneu")):
             return
         if capability == "recognition":
+            if context.get("model") == "base-directcompute":
+                return  # Native D3D11 process is owned by the active ASR task.
             try:
                 context.update(recognition_context(str(context.get("model") or "small"), str(context.get("device") or "cpu")))
             except ValueError as exc:

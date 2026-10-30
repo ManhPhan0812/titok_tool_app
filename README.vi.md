@@ -2,7 +2,7 @@
   <img src="src/haizflow/desktop/assets/branding/haizflow-mark.png" width="96" alt="Logo HaizFlow">
   <h1>HaizFlow</h1>
   <p><strong>Ứng dụng miễn phí để tải, dịch, tạo phụ đề và lồng tiếng video trên Windows.</strong></p>
-  <p><a href="https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-Setup.exe">Cài đặt</a> · <a href="docs/user-guide.vi.md">Hướng dẫn sử dụng</a> · <a href="docs/support.vi.md">Trợ giúp</a> · <a href="README.md">English</a></p>
+  <p><a href="https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-Setup.exe">Cài đặt</a> · <a href="docs/user-guide.vi.md">Hướng dẫn sử dụng</a> · <a href="docs/support.vi.md">Trợ giúp</a> · <a href="README.md">English</a></p>
 </div>
 
 ## Giới thiệu
@@ -81,7 +81,7 @@ Gemini, Zernio và các dịch vụ bên ngoài có điều khoản, hạn mức
 
 ## Cài đặt và bắt đầu
 
-**[Tải bộ cài Windows](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-Setup.exe).** Chỉ mở file EXE này; không cần tải hoặc giải nén các tệp Core. Bản fork 1.0.4 có thể cập nhật trực tiếp trong app. Nếu đang dùng bản gốc, cài Setup một lần để chuyển sang kênh fork này. Sau đó cập nhật bộ xử lý CPU/GPU trong Gói tài nguyên khi app yêu cầu; model và dự án đã có được giữ nguyên. Cài bộ Setup mới nếu muốn nhận thêm launcher khởi động đã tối ưu. [Thông tin phiên bản và cài đặt](https://github.com/ManhPhan0812/titok_tool_app/releases/latest).
+**[Tải bộ cài Windows](https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.6/HaizFlow-1.0.6-Setup.exe).** Chỉ mở file EXE này; không cần tải hoặc giải nén các tệp Core. Bản fork 1.0.4 có thể cập nhật trực tiếp trong app. Nếu đang dùng bản gốc, cài Setup một lần để chuyển sang kênh fork này. Sau đó cập nhật bộ xử lý CPU/GPU trong Gói tài nguyên khi app yêu cầu; model và dự án đã có được giữ nguyên. Cài bộ Setup mới nếu muốn nhận thêm launcher khởi động đã tối ưu. [Thông tin phiên bản và cài đặt](https://github.com/ManhPhan0812/titok_tool_app/releases/latest).
 
 1. Cài và mở HaizFlow. Giao diện mặc định là tiếng Việt.
 2. Chọn CPU hoặc GPU NVIDIA trong **Cài đặt → Chung** và cài các gói cần dùng trong **Gói tài nguyên**.
@@ -91,6 +91,8 @@ Gemini, Zernio và các dịch vụ bên ngoài có điều khoản, hạn mức
 Ứng dụng hỗ trợ Windows 10 phiên bản 1809 trở lên và Windows 11 x64, RAM lắp đặt từ 8 GB, Windows dùng được ít nhất 6 GiB; khuyên dùng từ 16 GB. Không cần cài Python khi dùng bộ cài. Cần thêm dung lượng cho gói tài nguyên, video và tệp xuất; bộ cài và trang Gói tài nguyên hiển thị yêu cầu tương ứng.
 
 Chế độ GPU cần card NVIDIA tương thích có ít nhất 3,5 GiB VRAM riêng và compute capability từ 7.0 cho bộ PyTorch 2.8/CUDA 12.8 hiện tại. Card cũ hoặc ít VRAM như Quadro K1000M 2 GB dùng CPU với Whisper Small CPU và HY-MT2 CPU Q4; máy dưới 12 GiB RAM dùng được sẽ không nạp trước model. Với card 4 GB tương thích, chọn Whisper Small GPU, HY-MT2 CPU Q4 hoặc Gemini và OmniVoice GPU; các bước nặng chạy lần lượt. Whisper Turbo và HY-MT2 GPU đầy đủ cần nhiều VRAM hơn. VRAM trống và RAM hệ thống tại lúc chạy vẫn phải đủ. Bản chưa ký số có thể bị Windows Smart App Control hoặc chính sách Application Control chặn; xem [hướng dẫn cài đặt](docs/install.vi.md).
+
+Phiên bản 1.0.6 bổ sung **Whisper Base · GPU cũ (DirectCompute)** cho bước nhận dạng trên K1000M, giữ dịch và giọng đọc trên CPU. Cần chọn riêng model nhận dạng này; bản này chưa có chế độ hỗn hợp tự động cho mọi tác vụ. [Cách dùng và giới hạn](docs/legacy-gpu.md).
 
 Xem [hướng dẫn cài đặt](docs/install.vi.md) để chọn gói CPU/GPU, thêm API key và chọn vị trí lưu dữ liệu. Xem [hướng dẫn sử dụng](docs/user-guide.vi.md) để tạo dự án, chỉnh phụ đề, lồng tiếng và đăng bài.
 

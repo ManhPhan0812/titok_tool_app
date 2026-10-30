@@ -69,7 +69,7 @@ class CpuRuntimeTests(unittest.TestCase):
         self.assertTrue(balanced.warm_whisper_on_startup)
         self.assertFalse(balanced.warm_hymt2_on_startup)
 
-        low_memory = self._profile(ram_gib=10, cpu_count=8)
+        low_memory = self._profile(ram_gib=14, cpu_count=8)
         self.assertEqual(low_memory.key, "cpu_low_memory")
         self.assertEqual(low_memory.whisper_batch_size, 2)
         self.assertEqual(low_memory.cpu_threads, 4)
@@ -79,20 +79,20 @@ class CpuRuntimeTests(unittest.TestCase):
         self.assertEqual(minimum.whisper_batch_size, 1)
         self.assertFalse(minimum.warm_whisper_on_startup)
 
-    def test_public_processing_requirement_rejects_sub_16gb_systems(self):
+    def test_public_processing_requirement_rejects_sub_8gb_systems(self):
         capabilities = hardware.HardwareCapabilities(
             cuda_available=False,
             cuda_name="",
             total_vram_bytes=0,
             free_vram_bytes=0,
-            total_ram_bytes=10 * 1024**3,
+            total_ram_bytes=4 * 1024**3,
             logical_cpu_count=8,
             ac_powered=True,
             battery_percent=100,
         )
         compatible, message = hardware.validate_processing_device("cpu", capabilities)
         self.assertFalse(compatible)
-        self.assertIn("16 GB", message)
+        self.assertIn("8 GB", message)
 
     def test_basic_hardware_snapshot_never_initializes_cuda(self):
         with (

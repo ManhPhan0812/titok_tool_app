@@ -10,10 +10,10 @@ Admission uses the smaller of system headroom and the current process's
 `ullAvailPageFile`. Virtual address-space counters are not commit counters.
 Failed telemetry is `None`; a measured zero remaining budget means exhaustion.
 
-Minimum eligibility remains 16 GiB installed DIMM capacity, not 14 GiB usable
-RAM as a proxy. At least 8 GiB must remain OS-usable; this is a separate safety
-floor for severely restricted systems, not support for 8 GiB installations.
-When installed capacity cannot be read, known usable RAM ≥16 GiB proves the
+Minimum eligibility is 8 GiB installed DIMM capacity, with at least 6 GiB
+OS-usable RAM. 16 GiB or more is recommended; heavy stages still check live
+physical and commit budgets before loading.
+When installed capacity cannot be read, known usable RAM ≥8 GiB proves the
 minimum; smaller usable RAM cannot establish installed capacity and requires a
 successful hardware probe. Settings and CPU/GPU pack compatibility share this
 policy; Auto, Manual and Batch use those pack checks before queueing work.
@@ -24,9 +24,9 @@ References: [installed memory API](https://learn.microsoft.com/en-us/windows/win
 
 ## CPU workload and lifetime
 
-Usable RAM below 24 GiB selects batch 2 / up to 4 CPU threads, no startup ASR
-warm-up and a 90-second HY-MT2 idle timeout. Under 7 GiB usable selects batch 1 /
-up to 2 threads (not automatically eligible hardware). Unknown capacity never
+Usable RAM from 12 to below 24 GiB selects batch 2 / up to 4 CPU threads, no startup ASR
+warm-up and a 90-second HY-MT2 idle timeout. Under 12 GiB usable selects batch 1 /
+up to 2 threads and a 15-second HY-MT2 idle timeout. Unknown capacity never
 selects the balanced profile. Live physical/commit pressure can reduce batches
 to 1 and threads to 2 at inference boundaries. GPU precision/batches are not
 changed by the CPU policy.
@@ -71,6 +71,7 @@ one-shot OmniVoice process cannot claim the persistent process's residency.
 Preflight failure occurs before model dispatch and uses normal recoverable
 pipeline errors; complete checkpoints/artifacts are not deleted.
 
+All speculative warm-up is disabled below 12 GiB usable CPU RAM.
 Speculative warm-up reserves more free memory for UI/decoding; voice,
 translation and separation predictions are disabled on constrained CPU
 systems. Missing telemetry denies speculative warm-up; idle memory pressure

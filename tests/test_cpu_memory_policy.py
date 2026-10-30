@@ -47,11 +47,11 @@ def test_installed_16gb_reserved_memory_passes_cpu_and_gpu_capacity():
     assert not profile.warm_whisper_on_startup
 
 
-@pytest.mark.parametrize("installed,usable", [(8, 7.9), (12, 11.5), (16, 6), (None, None), (None, 13.9)])
+@pytest.mark.parametrize("installed,usable", [(4, 3.9), (8, 5.9), (16, 5), (None, None), (None, 7.9)])
 def test_insufficient_or_unverified_capacity_is_not_eligible(installed, usable):
     compatible, reason = hardware.validate_processing_device("cpu", caps(installed=installed, usable=usable))
     assert not compatible
-    assert "16 GB" in reason
+    assert "8 GB" in reason
     assert "OS-usable" in reason
 
 
@@ -154,9 +154,9 @@ def test_resource_packs_share_capacity_policy_used_by_settings_auto_manual_batch
     controller._host = host
     for pack in ("engine-cpu-py313", "model-whisper-small", "model-hymt2-cpu", "model-demucs-cpu"):
         assert controller._hardware_compatibility(pack)[0]
-        host._hardware_capabilities = caps(installed=8, usable=7.9)
+        host._hardware_capabilities = caps(installed=8, usable=5.9)
         valid, reason = controller._hardware_compatibility(pack)
-        assert not valid and "7.9 GiB" in reason and "8.0 GiB" in reason
+        assert not valid and "5.9 GiB" in reason and "8.0 GiB" in reason
         host._hardware_capabilities = caps()
     assert models_for_device("cpu", recognition="small-cpu", translation="q4", voice="omnivoice") == {
         "speech_recognition_model": "small-cpu", "translation_model": "q4", "tts_provider": "omnivoice",

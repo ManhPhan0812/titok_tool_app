@@ -330,7 +330,7 @@ begin
   ContentTop := AddRequirementRow(
     CompatibilityPage,
     UiText('Bộ nhớ', 'Memory'),
-    UiText('Tối thiểu 16 GB RAM để chạy model. Chế độ CPU không cần GPU NVIDIA.', '16 GB RAM minimum for models. CPU mode works without an NVIDIA GPU.'),
+    UiText('Tối thiểu 8 GB RAM (Windows dùng được 6 GiB); khuyên dùng 16 GB. Chế độ CPU không cần GPU NVIDIA.', '8 GB installed RAM minimum (6 GiB OS-usable); 16 GB recommended. CPU mode works without an NVIDIA GPU.'),
     ContentTop
   );
   ContentTop := AddRequirementRow(

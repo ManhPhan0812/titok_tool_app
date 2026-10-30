@@ -274,6 +274,8 @@ class SmartWarmupController:
 
     def _has_warmup_budget(self, capability: str, context: dict) -> bool:
         profile = runtime_profile()
+        if not profile.cuda_available and profile.total_ram_gib < 12:
+            return False  # Small PCs reserve their RAM for foreground processing.
         if profile.cuda_available and profile.total_vram_gib < 5:
             return False  # Four GB cards load CUDA models only for foreground work.
         available = available_memory_bytes()

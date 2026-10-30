@@ -18,8 +18,11 @@ from haizflow.core.memory import MemorySnapshot, memory_snapshot
 _GIB = 1024 ** 3
 # Installed DIMM capacity establishes the public minimum. Usable RAM drives
 # inference policy, not an approximation of how much RAM was installed.
-_MIN_INSTALLED_RAM_BYTES = 16 * _GIB
-_MIN_USABLE_RAM_BYTES = 8 * _GIB
+_MIN_INSTALLED_RAM_BYTES = 8 * _GIB
+_MIN_USABLE_RAM_BYTES = 6 * _GIB
+# The shipped CUDA engine uses PyTorch 2.8/cu128 (Volta or newer).
+# Unknown architectures still require the native engine probe before use.
+_MIN_CUDA_CAPABILITY = (7, 0)
 # A nominal 4 GB board may report slightly under 4 GiB to the driver. Keep
 # 3 GB boards excluded, while admitting 4 GB CUDA cards for the light GPU path.
 _MIN_GPU_VRAM_BYTES = 7 * _GIB // 2
@@ -80,8 +83,23 @@ class HardwareCapabilities:
     installed_ram_bytes: int | None = None
 
     @property
+    def effective_cuda_capability(self) -> tuple[int, int]:
+        if self.cuda_compute_capability != (0, 0):
+            return self.cuda_compute_capability
+        # Legacy nvidia-smi drivers do not expose the compute_cap query.
+        if self.cuda_name.strip().lower() in {"quadro k1000m", "nvidia quadro k1000m"}:
+            return (3, 0)
+        return (0, 0)
+
+    @property
+    def cuda_architecture_supported(self) -> bool:
+        capability = self.effective_cuda_capability
+        return capability == (0, 0) or capability >= _MIN_CUDA_CAPABILITY
+
+    @property
     def gpu_supported(self) -> bool:
-        if not self.cuda_available or self.total_vram_bytes < _MIN_GPU_VRAM_BYTES:
+        if (not self.cuda_available or not self.cuda_architecture_supported
+                or self.total_vram_bytes < _MIN_GPU_VRAM_BYTES):
             return False
         # Free VRAM and AC state change during a session. They affect speed or
         # whether a particular load succeeds, not whether the GPU is capable.
@@ -549,10 +567,19 @@ def validate_processing_device(
     if preference == "gpu":
         if not capabilities.cuda_available:
             return False, "Không phát hiện GPU NVIDIA tương thích CUDA." if language == "vi" else "CUDA-compatible NVIDIA GPU was not detected."
+        if not capabilities.cuda_architecture_supported:
+            major, minor = capabilities.effective_cuda_capability
+            return False, (
+                f"{capabilities.cuda_name} (compute capability {major}.{minor}) không tương thích bộ xử lý GPU hiện tại. "
+                "Hãy chọn CPU, Whisper Small CPU và HY-MT2 CPU Q4; không cần card rời để xử lý."
+                if language == "vi" else
+                f"{capabilities.cuda_name} (compute capability {major}.{minor}) is incompatible with the current GPU engine. "
+                "Choose CPU, Whisper Small CPU and HY-MT2 CPU Q4; a dedicated GPU is optional."
+            )
         if capabilities.total_vram_bytes < _MIN_GPU_VRAM_BYTES:
             available = capabilities.total_vram_bytes / _GIB
-            return False, (f"Cần GPU NVIDIA CUDA có ít nhất 3.5 GiB VRAM riêng (card 4 GB); hiện có {available:.1f} GiB." if language == "vi" else
-                f"GPU mode requires a CUDA NVIDIA card with at least 3.5 GiB dedicated VRAM (4 GB class); detected {available:.1f} GiB."
+            return False, (f"Chế độ GPU cần ít nhất 3.5 GiB VRAM riêng (card 4 GB); hiện có {available:.1f} GiB. Chọn CPU để dùng Whisper Small CPU và HY-MT2 CPU Q4." if language == "vi" else
+                f"GPU mode requires at least 3.5 GiB dedicated VRAM (4 GB class); detected {available:.1f} GiB. Choose CPU to use Whisper Small CPU and HY-MT2 CPU Q4."
             )
     installed = getattr(capabilities, "installed_ram_bytes", None)
     usable = capabilities.total_ram_bytes
@@ -561,14 +588,14 @@ def validate_processing_device(
     if not _ram_capacity_supported(capabilities):
         if language == "vi":
             return False, (
-                f"HaizFlow cần RAM lắp đặt từ 16 GB (16 GiB) và ít nhất 8 GiB RAM Windows sử dụng được. "
+                f"HaizFlow cần RAM lắp đặt từ 8 GB (8 GiB) và ít nhất 6 GiB RAM Windows sử dụng được. "
                 f"RAM lắp đặt: {installed_text}; Windows sử dụng được: {usable_text}. "
                 "Kiểm tra lại cấu hình/bộ nhớ dành riêng cho phần cứng nếu số liệu chưa đúng."
             )
         installed_en = "unknown" if installed is None else f"{installed / _GIB:.1f} GiB"
         usable_en = "unknown" if not usable else f"{usable / _GIB:.1f} GiB"
         return False, (
-            "HaizFlow requires 16 GB installed RAM (16 GiB DIMM capacity) and at least 8 GiB OS-usable RAM; "
+            "HaizFlow requires 8 GB installed RAM (8 GiB DIMM capacity) and at least 6 GiB OS-usable RAM; "
             f"installed: {installed_en}; OS-usable: {usable_en}. Check hardware memory detection/reservation."
         )
     if preference == "gpu":
@@ -638,7 +665,7 @@ def runtime_profile_for(
         batch_size = 4
         cpu_threads = max(1, min(8, logical_cpus - 1 if logical_cpus > 2 else logical_cpus))
         idle_seconds = 300
-    elif total_gib >= 7:
+    elif total_gib >= 12:
         key = "cpu_low_memory"
         label = "CPU low memory"
         batch_size = 2
@@ -649,7 +676,7 @@ def runtime_profile_for(
         label = "CPU minimum memory"
         batch_size = 1
         cpu_threads = max(1, min(2, logical_cpus))
-        idle_seconds = 30
+        idle_seconds = 15
 
     return RuntimeProfile(
         key=key,

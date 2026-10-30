@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "release_version": "1.0.4",
-  "file": "HaizFlow-1.0.4-ThirdPartySources.zip",
-  "sha256": "d0a21b2231a2442185df6e2de856319da3ae6502ecd283a7de7839595fba9c56",
+  "release_version": "1.0.5",
+  "file": "HaizFlow-1.0.5-ThirdPartySources.zip",
+  "sha256": "281eefc5f0173787df69bfcdfc385f2f7a870d4757548b77d8e435f446c552d1",
   "size": 847739320,
-  "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.4/HaizFlow-1.0.4-ThirdPartySources.zip",
+  "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/HaizFlow-1.0.5-ThirdPartySources.zip",
   "files": [
     {
       "file": "ffmpeg-cli/build-msys2.sh",

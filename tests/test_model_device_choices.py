@@ -396,7 +396,7 @@ def test_no_model_load_is_queued_before_runtime_switch_starts():
     ("gpu", True, 8, 16, False, True),
     ("gpu", False, 8, 16, False, False),
     ("gpu", True, 4, 16, False, True),
-    ("gpu", True, 8, 8, False, False),
+    ("gpu", True, 8, 8, False, True),
     ("gpu", False, 0, 16, True, True),
 ])
 def test_gpu_options_use_resolved_hardware_not_only_saved_preference(device, cuda, vram, ram, pending, expected):

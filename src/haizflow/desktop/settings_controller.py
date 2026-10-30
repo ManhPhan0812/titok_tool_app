@@ -26,7 +26,7 @@ class SettingsController:
                 return False
             if not host._ensure_hardware_ready_for_action():
                 return False
-            compatible, reason = validate_processing_device(device, host._hardware_capabilities)
+            compatible, reason = validate_processing_device(device, host._hardware_capabilities, language=language)
             if not compatible:
                 host.appAlertRequested.emit("Không thể dùng bộ xử lý này", str(reason), "warning")
                 return False

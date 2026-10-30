@@ -84,17 +84,20 @@ Item {
         alignLeft: false
 
         SettingRow {
+                    objectName: "resourceHardwareSummary"
                     Layout.fillWidth: true
                     Layout.topMargin: Theme.space16
                     Layout.bottomMargin: Theme.space16
                     label: qsTr("Cấu hình máy")
-                    description: AppController.hardwareInfo.recommendedDevice === "gpu"
+                    description: (AppController.hardwareInfo.recommendedDevice === "gpu"
                         ? qsTr("NVIDIA · %1 · %2 VRAM")
                             .arg(AppController.hardwareInfo.availableGpuName)
                             .arg(AppController.hardwareInfo.totalVram)
                         : AppController.hardwareInfo.cpuName
                             ? qsTr("CPU · %1").arg(AppController.hardwareInfo.cpuName)
-                            : qsTr("Đang đọc thông tin CPU…")
+                            : qsTr("Đang đọc thông tin CPU…"))
+                        + (AppController.hardwareInfo.processingAdvice
+                            ? "\n" + AppController.hardwareInfo.processingAdvice : "")
                 }
 
                 Rectangle {

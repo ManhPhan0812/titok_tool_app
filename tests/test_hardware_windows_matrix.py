@@ -39,18 +39,23 @@ class Machine:
 MACHINES = [
     Machine("CPU-16-reserved", 16, 13.9, 0, False, (0, 0), True, False, 2),
     Machine("CPU-32", 32, 31, 0, False, (0, 0), True, False, 4),
-    Machine("CPU-8", 8, 7.8, 0, False, (0, 0), False, False, 2),
-    Machine("reserved-too-much", 16, 6, 0, False, (0, 0), False, False, 1),
-    Machine("unknown-installed", None, 13.9, 0, False, (0, 0), False, False, 2),
+    Machine("CPU-8", 8, 7.8, 0, False, (0, 0), True, False, 1),
+    Machine("reserved-6-usable", 16, 6, 0, False, (0, 0), True, False, 1),
+    Machine("unknown-installed", None, 13.9, 0, False, (0, 0), True, False, 2),
     Machine("unknown-all", None, 0, 0, False, (0, 0), False, False, 1),
     Machine("usable-proves-capacity", None, 32, 0, False, (0, 0), True, False, 4),
-    Machine("GTX-1070", 128, 127, 8, True, (6, 1), True, True, 4),
+    Machine("GTX-1070", 128, 127, 8, True, (6, 1), True, False, 4),
     Machine("RTX-2060-6", 16, 13.9, 6, True, (7, 5), True, True, 2),
     Machine("RTX-4090-24", 64, 63, 24, True, (8, 9), True, True, 4),
     Machine("GPU-4", 32, 31, 4, True, (7, 5), True, True, 4),
     Machine("RTX-2050-4-16", 16, 13.9, 4, True, (8, 6), True, True, 2),
     Machine("driver-unavailable", 32, 31, 8, False, (8, 6), True, False, 4),
-    Machine("GPU-but-insufficient-RAM", 8, 7.8, 24, True, (8, 9), False, False, 2),
+    Machine("GPU-8GB-RAM", 8, 7.8, 24, True, (8, 9), True, True, 1),
+    Machine("NVIDIA Quadro K1000M", 8, 7.8, 2, True, (3, 0), True, False, 1),
+    Machine("NVIDIA Quadro K1000M", 16, 13.9, 2, True, (0, 0), True, False, 2),
+    Machine("GPU-2GB-modern", 16, 13.9, 2, True, (7, 5), True, False, 2),
+    Machine("CPU-4GB", 4, 3.8, 0, False, (0, 0), False, False, 1),
+    Machine("CPU-reserved-too-much", 8, 5.9, 0, False, (0, 0), False, False, 1),
 ]
 
 
@@ -92,7 +97,7 @@ def test_admission_ui_and_resource_packs_agree(machine, device):
 
 @pytest.mark.parametrize("project_type", ["single", "manual", "batch"])
 @pytest.mark.parametrize("device", ["cpu", "gpu"])
-@pytest.mark.parametrize("machine", [MACHINES[0], MACHINES[2], MACHINES[7], MACHINES[9], MACHINES[10]], ids=lambda value: value.name)
+@pytest.mark.parametrize("machine", [MACHINES[i] for i in (0, 2, 7, 9, 10, 14, 15, 17, 18)], ids=lambda value: value.name)
 def test_auto_manual_batch_preflight_share_hardware_admission(machine, device, project_type):
     from haizflow.schemas.video import VideoConfig
 

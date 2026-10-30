@@ -3456,6 +3456,10 @@ class HaizFlowController(QObject):
             "acPowered": capabilities.ac_powered,
             "batteryPercent": capabilities.battery_percent if capabilities.battery_percent is not None else -1,
             "recommendedDevice": recommended_processing_device(capabilities),
+            "processingAdvice": (
+                validate_processing_device("gpu", capabilities, language=self._settings_language)[1]
+                if capabilities.cuda_available and not capabilities.gpu_supported else ""
+            ),
             "profileLabel": profile.label,
         }
 

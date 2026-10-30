@@ -67,7 +67,7 @@ class ResourcePackManifestTests(unittest.TestCase):
         from haizflow.core.hardware import HardwareCapabilities
         from haizflow.desktop.resource_pack_controller import ResourcePackController
 
-        for ram, allowed in ((16, True), (8, False)):
+        for ram, allowed in ((16, True), (8, True), (4, False)):
             capabilities = HardwareCapabilities(
                 cuda_available=True, cuda_name="NVIDIA 6 GB", total_vram_bytes=6 * 1024**3,
                 free_vram_bytes=4 * 1024**3, total_ram_bytes=ram * 1024**3,

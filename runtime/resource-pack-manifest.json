@@ -3,11 +3,11 @@
   "protocol_version": 1,
   "packs": {
     "engine-cpu-py313": {
-      "version": "17",
-      "url": "https://github.com/MachHongHai/HaizFlow/releases/download/v1.0.4/engine-cpu-py313-17.zip",
-      "sha256": "d9cbf1261c9babd46884efc0104ce01d7ca10838f1400de4e65b4ab1751c99fc",
-      "download_size": 358137470,
-      "installed_size": 880476295
+      "version": "18",
+      "url": "https://github.com/ManhPhan0812/titok_tool_app/releases/download/v1.0.5/engine-cpu-py313-18.zip",
+      "sha256": "a723201997adc1fa77c62f0efccbb61e7ab664621c1df89de55d519029c267ba",
+      "download_size": 350019350,
+      "installed_size": 866665949
     },
     "engine-cuda128-py313": {
       "version": "19",

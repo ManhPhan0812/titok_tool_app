@@ -166,9 +166,13 @@ class MultiProjectControllerTests(unittest.TestCase):
         self.assertTrue(next(item for item in options if item["value"] == "large-v3-turbo")["available"])
 
     def test_whisper_turbo_option_can_be_selected_to_explain_missing_pack(self):
+        from haizflow.core.hardware import HardwareCapabilities
+
         host = SimpleNamespace(
-            _hardware_capabilities=SimpleNamespace(cuda_available=True, cuda_name="GPU",
-                total_vram_bytes=8 * 1024**3, total_ram_bytes=16 * 1024**3),
+            _hardware_capabilities=HardwareCapabilities(cuda_available=True, cuda_name="GPU",
+                total_vram_bytes=8 * 1024**3, free_vram_bytes=8 * 1024**3,
+                total_ram_bytes=16 * 1024**3, logical_cpu_count=8, ac_powered=True,
+                battery_percent=None, cuda_compute_capability=(7, 5)),
             _active_processing_device="gpu",
             _settings_processing_device="gpu",
             _whisper_turbo_model_ready=False,
